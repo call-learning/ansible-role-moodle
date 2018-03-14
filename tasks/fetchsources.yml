@@ -1,0 +1,8 @@
+---
+
+- name: Moodle- Install Moodle source code in the destination folder
+  git:
+    repo: "{{ moodle_git_url }}"
+    dest: "{{ moodle_src_path }}"
+    version: "{{ moodle_version }}"
+

@@ -1,0 +1,20 @@
+---
+- hosts: all
+
+  vars_files:
+    - test-vars.yml
+
+  pre_tasks:
+    - include: test-setup.yml
+
+  roles:
+    - name: geerlingguy.repo-remi
+      when: ansible_os_family == "RedHat"
+    - role: geerlingguy.repo-dotdeb
+      when: ansible_distribution == 'Debian'
+    - geerlingguy.apache
+    - geerlingguy.php
+    - geerlingguy.postgresql
+    - geerlingguy.php-pgsql
+    - geerlingguy.git
+    - role_under_test

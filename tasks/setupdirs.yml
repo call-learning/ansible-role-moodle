@@ -1,0 +1,23 @@
+---
+- name: Moodle- Check before if installation directory exists
+  stat:
+    path: "{{ moodle_src_path }}/config.php"
+  register: moodle_site_source_stat
+
+- name: Moodle- Create installation directory if it does not exist
+  file:
+    dest: "{{ moodle_src_path }}"
+    state: directory
+    owner: "{{ moodle_webserver_user }}"
+    group: "{{ moodle_webserver_group }}"
+  become: yes
+
+
+- name: Moodle- Create data directory if it does not exist
+  file:
+    dest: "{{ moodle_sitedata_path }}"
+    state: directory
+    owner: "{{ moodle_webserver_user }}"
+    group: "{{ moodle_webserver_group }}"
+    mode: "u=rwx,g=rwx,o=r"
+  become: yes
