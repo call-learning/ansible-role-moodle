@@ -16,3 +16,8 @@
     - geerlingguy.php-pgsql
     - geerlingguy.git
     - role_under_test
+
+  tasks:
+    - name: Moodle - Trigger installation
+      command: /bin/true
+      notify: intiate moodle configuration

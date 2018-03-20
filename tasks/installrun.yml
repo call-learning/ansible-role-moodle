@@ -1,6 +1,0 @@
----
-# Mainly for testing purpose but can be used just to start the install
-
-- name: Moodle - Trigger installation
-  command: /bin/true
-  notify: intiate moodle configuration

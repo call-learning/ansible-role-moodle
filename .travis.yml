@@ -2,14 +2,10 @@
 services: docker
 
 env:
-  # Test package install on all supported OSes.
-  - distro: centos7
-    playbook: test.yml
-    moodle_version: MOODLE_34_STABLE
-  - distro: fedora24
-    playbook: test.yml
-    moodle_version: MOODLE_34_STABLE
-  - distro: debian8
+  # Test package install on all supported OSes (for now only Debian/Ubuntu).
+  # There are several issues with CentOS7 (postgres version < 9.3) and issue
+  # with git playbook on fedora 24
+  - distro: debian9
     playbook: test.yml
     moodle_version: MOODLE_34_STABLE
   - distro: ubuntu1604

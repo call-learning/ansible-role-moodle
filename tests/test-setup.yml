@@ -39,6 +39,28 @@
       - php7.0-fpm
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
+- name: Set php_packages for PHP CentOS/Redhat from REMI package.
+  set_fact:
+    php_packages:
+      - php-cli
+      - php-common
+      - php-curl
+      - php-gd
+      - php-intl
+      - php-json
+      - php-mbstring
+      - php-mcrypt
+      - php-opcache
+      - php-pgsql
+      - php-readline
+      - php-soap
+      - php-xml
+      - php-xmlrpc
+      - php-zip
+      - php-fpm
+      - php-pecl-apcu
+  when: ansible_os_family == "RedHat"
+
 - name: Copy initctl_faker into place for Ubuntu 14.04.
   copy:
     src: initctl_faker
@@ -48,3 +70,7 @@
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '14.04'
   changed_when: false
 
+- name: Define postgresql_version to 9.3 for RedHat/CentOS.
+  set_fact:
+    postgresql_version: "9.3"
+  when: ansible_os_family == "RedHat"

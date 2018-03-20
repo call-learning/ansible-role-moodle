@@ -1,8 +1,8 @@
 ---
 # Front-end Moodle User (make sure either the webserver can 'login as' this user -for example through libapache2-mpm-itk )
 # or use the standard web server user
-moodle_webserver_user: www-data
-moodle_webserver_group: www-data
+moodle_webserver_user: "{{ (ansible_os_family == \"RedHat\") | ternary('apache','www-data') }}"
+moodle_webserver_group: "{{ (ansible_os_family == \"RedHat\") | ternary('apache','www-data') }}"
 
 # The core version you want to use (e.g. 3.2.1, 2.8.4).
 moodle_version: "MOODLE_34_STABLE" # Tag or branch name
