@@ -9,4 +9,4 @@
     dest: "{{ moodle_src_path }}/config.php"
     mode: 0644
   notify: intiate moodle configuration
-  when: moodle_site_source_stat is defined and not moodle_site_source_stat.stat.exists
+  when: moodle_run_config|bool and moodle_site_source_stat is defined and not moodle_site_source_stat.stat.exists

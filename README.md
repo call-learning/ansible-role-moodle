@@ -1,6 +1,7 @@
 # Ansible Role: Moodle
 
 Installs Moodle (3.0+) on RedHat and Debian/Ubuntu servers.
+Tested with Ansible 2.5
 
 ## Requirements
 
