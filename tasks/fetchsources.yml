@@ -5,4 +5,5 @@
     repo: "{{ moodle_git_url }}"
     dest: "{{ moodle_src_path }}"
     version: "{{ moodle_version }}"
+    depth: 1 # Only shallow cloning. Can be fixed if needed later to have the full history (git pull --unshallow)
 
