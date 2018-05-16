@@ -6,18 +6,11 @@ galaxy_info:
   description: Moodle RedHat/CentOS/Fedora/Debian/Ubuntu.
   company: "SAS CALL Learning"
   license: "license (BSD, MIT)"
-  min_ansible_version: 2.0
+  min_ansible_version: 2.5
   platforms:
-  - name: EL
-    versions:
-    - 6
-    - 7
-  - name: Fedora
-    versions:
-    - all
   - name: Debian
     versions:
-    - all
+    - stretch
   - name: Ubuntu
     versions:
     - trusty

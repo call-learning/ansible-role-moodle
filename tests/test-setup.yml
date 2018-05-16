@@ -37,6 +37,7 @@
       - php7.0-xmlrpc
       - php7.0-zip
       - php7.0-fpm
+      - php-apcu  # Important for the command line
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Set php_packages for PHP CentOS/Redhat from REMI package.

@@ -40,7 +40,15 @@ This role was created in 2017 by [Laurent David](https://github.com/laurentdavid
 We have used Jeff Geerling's tests as a base, so:
 
 - Test should run on travis  
-- Locally you can start the test process using the command `./tests/test.sh`
+- Locally you can start the test process using the command
+
+        ./tests/test.sh
+    
+    The docker instance is destroyed at the end of the test, but you can keep it by setting the
+     environment variable "cleanup" to "false":
+     
+        cleanup="false" ./tests/test.sh
+     
 - Once the docker has been launch you can rerun the playbook by running:
 ```bash
     container_id=xxxxyyy
@@ -48,6 +56,8 @@ We have used Jeff Geerling's tests as a base, so:
 ```
 
 Prerequisites are to have docker installed locally.
-It will run the tests on postgresql. 
+It will run the tests on postgresql only. More info in the README.md file in the tests folder.
 
-
+### Library testing
+There is a small module that checks if moodle is installed/configured in the library folder.
+More info in the README.md of the library folder.

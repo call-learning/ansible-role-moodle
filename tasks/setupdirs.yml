@@ -1,4 +1,7 @@
 ---
+# Creates the relevant directories to install moodle:
+# - a source directory
+# - a data directory where we will have all site data
 - name: Moodle- Check before if installation directory exists
   stat:
     path: "{{ moodle_src_path }}/config.php"

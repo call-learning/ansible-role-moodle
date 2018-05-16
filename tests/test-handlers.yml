@@ -20,4 +20,8 @@
   tasks:
     - name: Moodle - Trigger installation
       command: /bin/true
-      notify: intiate moodle configuration
+      notify: install moodle
+
+    - name: Moodle - Trigger installation
+      command: /bin/true
+      notify: update moodle

@@ -3,10 +3,29 @@
 - import_tasks: setupdirs.yml
 - import_tasks: fetchsources.yml
 
-- name: Moodle - Create config template and trigger install
-  template:
-    src: config.php.j2
-    dest: "{{ moodle_src_path }}/config.php"
-    mode: 0644
-  notify: intiate moodle configuration
-  when: moodle_run_config|bool and moodle_site_source_stat is defined and not moodle_site_source_stat.stat.exists
+- name: Verify Ansible meets version requirements
+  assert:
+    that: "ansible_version.full is version_compare('2.5', '>=')"
+  msg: "You must update Ansible to at least 2.5 to use this role."
+
+# This is using our custom module to check moodle state
+- name: Moodle - Check the state of current moodle
+  check_moodle:
+    install_dir: "{{ moodle_src_path }}"
+  register: moodle_state
+
+- name: Moodle - create config and install moodle
+  block:
+    - template:
+        src: config.php.j2
+        dest: "{{ moodle_src_path }}/config.php"
+        mode: 0644
+      notify: install moodle
+  when: moodle_run_config|bool and moodle_site_source_stat is defined and not moodle_state.moodle_is_installed|bool
+
+
+- name: Moodle - Launch update (if needed)
+  command:  /bin/true
+  notify: upgrade moodle
+  when: moodle_run_config|bool and moodle_site_source_stat is defined and moodle_state.moodle_needs_upgrading|bool
+
