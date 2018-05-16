@@ -27,6 +27,7 @@ playbook=${playbook:-"test.yml"}
 cleanup=${cleanup:-"true"}
 container_id=${container_id:-$timestamp}
 test_idempotence=${test_idempotence:-"true"}
+publish_port={publish_port:-""} # Add publish_port="-p 8000:80" to forward port 80 to 8000
 
 ## Set up vars for Docker setup.
 # CentOS 7
@@ -69,7 +70,7 @@ opts="$opts --add-host moodle.test:127.0.0.1 "
 # Run the container using the supplied OS.
 printf ${green}"Starting Docker container: geerlingguy/docker-$distro-ansible."${neutral}"\n"
 docker pull geerlingguy/docker-$distro-ansible:latest
-docker run --detach --volume="$PWD":/etc/ansible/roles/role_under_test:rw --name $container_id $opts geerlingguy/docker-$distro-ansible:latest $init
+docker run $publish_port --detach --volume="$PWD":/etc/ansible/roles/role_under_test:rw --name $container_id $opts geerlingguy/docker-$distro-ansible:latest $init
 
 printf "\n"
 

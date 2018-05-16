@@ -56,19 +56,8 @@ We have used Jeff Geerling's tests as a base, so:
 ```
 
 Prerequisites are to have docker installed locally.
-It will run the tests on postgresql. 
+It will run the tests on postgresql only. More info in the README.md file in the tests folder.
 
 ### Library testing
 There is a small module that checks if moodle is installed/configured in the library folder.
-To test it you need to install nose
-
-    pip install nose
-    
-Then:
-
-    cd library
-    nosetests -v test_check_moodle.py
-    
-You can also test it using a mini test playbook:
-
-    ansible-playbook -i 'localhost,' tests/test-check-moodle.yml 
+More info in the README.md of the library folder.

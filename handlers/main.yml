@@ -1,5 +1,5 @@
 ---
-
+# Handle moodle installation (i.e. the setup process). We assume here that the config.php has been set and is valid
 - name: moodle installer
   listen: install moodle
   command: >
@@ -8,6 +8,7 @@
   args:
     chdir: "{{ moodle_src_path }}"
 
+# Handle moodle upgrade if needed
 - name: moodle upgrader
   listen: upgrade moodle
   command: >
