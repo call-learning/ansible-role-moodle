@@ -42,12 +42,12 @@ We have used Jeff Geerling's tests as a base, so:
 - Test should run on travis  
 - Locally you can start the test process using the command
 
-        ./tests/test.sh
+        ./tests/test_local.sh
     
     The docker instance is destroyed at the end of the test, but you can keep it by setting the
      environment variable "cleanup" to "false":
      
-        cleanup="false" ./tests/test.sh
+        cleanup="false" ./tests/test_local.sh
      
 - Once the docker has been launch you can rerun the playbook by running:
 ```bash

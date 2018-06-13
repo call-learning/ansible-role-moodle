@@ -100,7 +100,7 @@ $CFG->wwwroot   = '{{ (moodle_is_https) | ternary('https://','http://')}}{{ mood
 //
 // - On Windows systems you might specify something like 'c:\moodledata'
 
-$CFG->dataroot  = '{{ moodle_sitedata_path }}';
+$CFG->dataroot  = '{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.data_dir_name }}';
 
 
 //=========================================================================
@@ -423,9 +423,12 @@ $CFG->admin = 'admin';
 // Localcachedir is intended for server clusters, it does not have to be shared by cluster nodes.
 // The directories must not be accessible via web.
 //
-//     $CFG->tempdir = '/var/www/moodle/temp';        // Directory MUST BE SHARED by all clsuter nodes.
-//     $CFG->cachedir = '/var/www/moodle/cache';      // Directory MUST BE SHARED by all cluster nodes, locking required.
-//     $CFG->localcachedir = '/var/local/cache';      // Intended for local node caching.
+$CFG->tempdir = '{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.data_dir_name }}';
+// Directory MUST BE SHARED by all clsuter nodes.
+$CFG->cachedir = '{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.cache_dir_name }}';
+// Directory MUST BE SHARED by all cluster nodes, locking required.
+$CFG->localcachedir = '{{ moodle_sitedata.local_data_folder }}/{{ moodle_sitedata.cache_dir_name }}';
+// Intended for local node caching.
 //
 // Some filesystems such as NFS may not support file locking operations.
 // Locking resolves race conditions and is strongly recommended for production servers.
