@@ -13,6 +13,7 @@
         state: touch
         mode: 0666
       when: ansible_distribution == 'Ubuntu'
+      changed_when: False
   roles:
     - name: geerlingguy.repo-remi
       when: ansible_os_family == "RedHat"
