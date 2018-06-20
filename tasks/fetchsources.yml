@@ -1,5 +1,11 @@
 ---
 
+- name: Make sure that Patch package is installed on CentOS
+  yum:
+    name: patch
+    state: present
+  when: ansible_os_family == 'RedHat'
+
 - name: Moodle- Check before if installation directory exists
   stat:
     path: "{{ moodle_src_path }}/.git"
