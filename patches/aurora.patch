@@ -8,8 +8,8 @@ index 05c6c43..2b9351a 100644
      public function is_compressed_row_format_supported($cached = true) {
 +        // START: Patch for Aurora Mysql to avoid issue at install
 +        // See https://tracker.moodle.org/browse/MDL-58931
-+        if ( array_key_exists($this->dboptions,'disablecompressedrowfomat')
-+            && $this->dboptions['disablecompressedrowfomat'] ) {
++        if ( isset($this->dboptions['disablecompressedrowformat'])
++            && $this->dboptions['disablecompressedrowformat'] ) {
 +            $this->compressedrowformatsupported =  false;
 +            return false;
 +        }
