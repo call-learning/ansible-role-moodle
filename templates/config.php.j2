@@ -70,6 +70,9 @@ $CFG->dboptions = array(
                                 // can be removed for MySQL (by default it will
                                 // use 'utf8mb4_unicode_ci'. This option should
                                 // be removed for all other databases.
+{% for conf in moodle_extra_db_options %}
+    '{{conf.name}} => '{{ conf.value }}',
+{% endfor %}
 );
 
 

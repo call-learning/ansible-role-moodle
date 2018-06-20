@@ -51,7 +51,15 @@ moodle_extra_conf:
   - {name: noemailever, value: 'true'}
   - {name: debug, value: '(E_ALL | E_STRICT)'}
 
+# Additional database options
+moodle_extra_db_options: []
+
+
 # If set to no, do not launch setup database/config file
 moodle_run_config: yes
 
 shared_drive_subfolder_create: true
+
+patch_to_apply: []
+
+

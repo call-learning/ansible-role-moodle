@@ -6,4 +6,13 @@
     dest: "{{ moodle_src_path }}"
     version: "{{ moodle_version }}"
     depth: 1 # Only shallow cloning. Can be fixed if needed later to have the full history (git pull --unshallow)
+  when: moodle_site_source_stat is defined and not moodle_site_source_stat.stat.exists  # Do not do anything when we have
+  # a config.php in the source folder
 
+# Apply patch depending on the patch_to_apply variable
+- name: Moodle- Apply all patches
+  patch:
+    src: "patches/{{ item }}.patch"
+    basedir: "{{ moodle_src_path }}"
+    strip: 1
+  loop: "{{ patch_to_apply }}"

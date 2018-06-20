@@ -16,3 +16,6 @@
   args:
     chdir: "{{ moodle_src_path }}"
 
+- name: patch source for aurora-mysql
+  listen: patch aurora
+  patch:

@@ -45,3 +45,6 @@ mysql_users:
     priv: "{{ moodle_database.dbname }}.*:ALL"
 
 dbengine: "mysql"
+
+patch_to_apply:
+  - aurora
