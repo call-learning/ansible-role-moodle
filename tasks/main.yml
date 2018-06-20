@@ -20,6 +20,8 @@
         src: config.php.j2
         dest: "{{ moodle_src_path }}/config.php"
         mode: 0644
+        owner: "{{ moodle_webserver_user }}"
+        group: "{{ moodle_webserver_group }}"
       notify: install moodle
   when: moodle_run_config|bool and moodle_site_source_stat is defined and not moodle_state.moodle_is_installed|bool
 
