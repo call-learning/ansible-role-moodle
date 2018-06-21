@@ -53,7 +53,7 @@ fi
 opts="$opts --add-host moodle.test:127.0.0.1 "
 
 # Disable apparmor for mysqld as it creates issue at install (https://github.com/moby/moby/issues/7276#issuecomment-68827244)
-if [[ "$distro" =~ ^ubuntu1[6-8]04 ]]  && [ -f /etc/lsb-release ] &&  [ /etc/apparmor.d/usr.sbin.mysqld ]; then
+if [[ "$distro" =~ ^(ubuntu1[6-8]04|debian9)$ ]]  && [ -f /etc/lsb-release ] &&  [ /etc/apparmor.d/usr.sbin.mysqld ]; then
     source /etc/lsb-release
     if [ $DISTRIB_ID = 'Ubuntu' ]; then
         printf "Disabling apparmor for mysql"
@@ -105,7 +105,7 @@ if [ "$cleanup" = true ]; then
   docker rm -f $container_id
 fi
 
-if [[ "$distro" =~ ^ubuntu1[6-8]04 ]]  && [ -f /etc/lsb-release ] &&  [ /etc/apparmor.d/usr.sbin.mysqld ]; then
+if [[ "$distro" =~ ^(ubuntu1[6-8]04|debian9)$ ]]  && [ -f /etc/lsb-release ] &&  [ /etc/apparmor.d/usr.sbin.mysqld ]; then
     if [ $DISTRIB_ID = 'Ubuntu' ]; then
         printf "Enabling apparmor for mysql again"
         sudo rm /etc/apparmor.d/disable/usr.sbin.mysqld || true
