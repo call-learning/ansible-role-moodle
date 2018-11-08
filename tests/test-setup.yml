@@ -18,48 +18,43 @@
   apt_repository: repo='ppa:ondrej/php'
   when: ansible_distribution == "Ubuntu" and ansible_distribution_version != "16.04"
 
+- name: Set php_packages for all distributions
+  block:
+    - set_fact:
+        php_packages: []
+    - set_fact:
+        php_prefix: php
+    - set_fact:
+        php_prefix: php7.0
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    - set_fact:
+        php_packages: "{{ php_packages }} + [ '{{ php_prefix }}-{{ item }}' ]"
+      with_items:
+        - cli
+        - common
+        - curl
+        - gd
+        - intl
+        - json
+        - mbstring
+        - mcrypt
+        - opcache
+        - pgsql
+        - readline
+        - soap
+        - xml
+        - xmlrpc
+        - zip
+        - fpm
+
 - name: Set php_packages for PHP 7.0 Debian 8 install.
   set_fact:
-    php_packages:
-      - php7.0-cli
-      - php7.0-common
-      - php7.0-curl
-      - php7.0-gd
-      - php7.0-intl
-      - php7.0-json
-      - php7.0-mbstring
-      - php7.0-mcrypt
-      - php7.0-opcache
-      - php7.0-pgsql
-      - php7.0-readline
-      - php7.0-soap
-      - php7.0-xml
-      - php7.0-xmlrpc
-      - php7.0-zip
-      - php7.0-fpm
-      - php-apcu  # Important for the command line
+    php_packages: "{{ php_packages }} + ['php-apcu']"
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: Set php_packages for PHP CentOS/Redhat from REMI package.
   set_fact:
-    php_packages:
-      - php-cli
-      - php-common
-      - php-curl
-      - php-gd
-      - php-intl
-      - php-json
-      - php-mbstring
-      - php-mcrypt
-      - php-opcache
-      - php-pgsql
-      - php-readline
-      - php-soap
-      - php-xml
-      - php-xmlrpc
-      - php-zip
-      - php-fpm
-      - php-pecl-apcu
+    php_packages: "{{ php_packages }} + ['php-pecl-apcu']"
   when: ansible_os_family == "RedHat"
 
 - name: Copy initctl_faker into place for Ubuntu 14.04.
@@ -75,3 +70,63 @@
   set_fact:
     postgresql_version: "9.3"
   when: ansible_os_family == "RedHat"
+
+- name: Set php_package for postgres
+  set_fact:
+    php_packages: "{{ php_packages }} + ['{{ php_prefix }}-pgsql']"
+  when: dbengine == 'postgres'
+
+- name: debug
+  debug:
+        msg: "System {{ moodle_database }} "
+
+- name: Set php_package for mysql
+  block:
+    - set_fact:
+        php_packages: "{{ php_packages }} + ['{{ php_prefix }}-mysql']"
+    - set_fact:
+        moodle_database: "{{ moodle_database | combine({ 'dbtype': 'mysqli'}) }}"
+  when: dbengine == 'mysql'
+
+- name: Tweak Centos package names
+  block:
+    - set_fact:
+        mysql_packages:
+          - mariadb
+          - mariadb-server
+          - mariadb-libs
+          - MySQL-python
+          - perl-DBD-MySQL
+    - set_fact:
+        mysql_daemon: mariadb
+    - set_fact:
+        mysql_log_error: /var/log/mariadb/mariadb.log
+    - set_fact:
+        mysql_syslog_tag: mariadb
+    - set_fact:
+        mysql_syslog_tag: /var/run/mariadb/mariadb.pid
+  when: ansible_os_family == 'RedHat'
+
+# https://blogs.oracle.com/jsmyth/apparmor-and-mysql
+# We need a way to disable apparmor for mysql
+
+## Specific for debian 9: we need to install mariadb at least 1.10
+## as previous version are not compatible with moodle 3.0+
+
+- name: Add repository for MariaDB (Debian) and set packages to mariadb
+  block:
+    - apt: name={{ item }} state=present
+      with_items:
+      - apt-utils
+      - dirmngr
+      - software-properties-common
+    - apt_key: url=http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xF1656F24C74CD1D8 state=present
+    - apt_repository:
+        repo : deb [arch=amd64,i386,ppc64el] http://mariadb.mirrors.ovh.net/MariaDB/repo/10.3/debian stretch main
+        state : present
+    - set_fact:
+        mysql_packages:
+          - mariadb-client
+          - mariadb-server
+          - python-mysqldb
+  when: ansible_distribution == "Debian" and ansible_distribution_release == "stretch"

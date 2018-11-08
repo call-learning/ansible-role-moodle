@@ -3,8 +3,8 @@ dependencies: []
 
 galaxy_info:
   author: laurentdavid
-  description: Moodle RedHat/CentOS/Fedora/Debian/Ubuntu.
-  company: "SAS CALL Learning"
+  description: Moodle CentOS/Debian/Ubuntu.
+  company: "CALL Learning"
   license: "license (BSD, MIT)"
   min_ansible_version: 2.5
   platforms:
@@ -13,8 +13,11 @@ galaxy_info:
     - stretch
   - name: Ubuntu
     versions:
-    - trusty
     - xenial
+    - trusty
+  - name: EL
+    versions:
+    - 7
   galaxy_tags:
     - development
     - web
