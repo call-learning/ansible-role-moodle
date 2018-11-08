@@ -426,10 +426,12 @@ $CFG->admin = 'admin';
 // Localcachedir is intended for server clusters, it does not have to be shared by cluster nodes.
 // The directories must not be accessible via web.
 //
-$CFG->tempdir = '{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.data_dir_name }}';
-// Directory MUST BE SHARED by all clsuter nodes.
-$CFG->cachedir = '{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.cache_dir_name }}';
+
+// Directory MUST BE SHARED by all cluster nodes.
+$CFG->tempdir = '{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.temp_dir_name }}';
 // Directory MUST BE SHARED by all cluster nodes, locking required.
+$CFG->cachedir = '{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.cache_dir_name }}';
+
 $CFG->localcachedir = '{{ moodle_sitedata.local_data_folder }}/{{ moodle_sitedata.cache_dir_name }}';
 // Intended for local node caching.
 //

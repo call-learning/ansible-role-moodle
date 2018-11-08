@@ -48,3 +48,6 @@ dbengine: "mysql"
 
 patch_to_apply:
   - aurora
+
+
+moodle_version: "MOODLE_34_STABLE" # Tag or branch name

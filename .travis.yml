@@ -14,9 +14,9 @@ env:
   - distro: ubuntu1604
     playbook: test.yml
     moodle_version: MOODLE_34_STABLE
-#  - distro: ubuntu1804
-#    playbook: test.yml
-#    moodle_version: MOODLE_34_STABLE
+  - distro: ubuntu1804
+    playbook: test.yml
+    moodle_version: MOODLE_34_STABLE
   - distro: ubuntu1404
     playbook: test.yml
     moodle_version: MOODLE_34_STABLE
