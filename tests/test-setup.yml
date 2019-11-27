@@ -52,9 +52,10 @@
     php_packages: "{{ php_packages }} + ['php-apcu']"
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
+# Need to add php-process so we can use moodle moosh
 - name: Set php_packages for PHP CentOS/Redhat from REMI package.
   set_fact:
-    php_packages: "{{ php_packages }} + ['php-pecl-apcu']"
+    php_packages: "{{ php_packages }} + ['php-pecl-apcu', 'php-process']"
   when: ansible_os_family == "RedHat"
 
 - name: Copy initctl_faker into place for Ubuntu 14.04.
@@ -85,7 +86,7 @@
     - set_fact:
         php_packages: "{{ php_packages }} + ['{{ php_prefix }}-mysql']"
     - set_fact:
-        moodle_database: "{{ moodle_database | combine({ 'dbtype': 'mysqli'}) }}"
+        moodle_database: "{{ moodle_database | combine({ 'dbtype': 'mariadb'}) }}"
   when: dbengine == 'mysql'
 
 - name: Tweak Centos package names

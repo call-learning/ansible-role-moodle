@@ -2,6 +2,7 @@
 
 - import_tasks: setupdirs.yml
 - import_tasks: fetchsources.yml
+- import_tasks: setupmoosh.yml
 
 - name: Verify Ansible meets version requirements
   assert:

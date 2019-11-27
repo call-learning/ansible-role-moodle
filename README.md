@@ -55,9 +55,21 @@ We have used Jeff Geerling's tests as a base, so:
     docker exec --tty $container_id env TERM=xterm ansible-playbook /etc/ansible/roles/role_under_test/tests/test.yml
 ```
 
+To test specific playbook such as the check_moodle.py part:
+ 
+```bash
+    container_id=xxxxyyy
+    docker exec $container_id env TERM=xterm env ANSIBLE_FORCE_COLOR=1 ansible-playbook -i 'localhost,' -M /etc/ansible/roles/role_under_test/library /etc/ansible/roles/role_under_test/tests/test-check-moodle.yml
+```
+
 Prerequisites are to have docker installed locally.
 It will run the tests on postgresql only. More info in the README.md file in the tests folder.
 
 ### Library testing
 There is a small module that checks if moodle is installed/configured in the library folder.
 More info in the README.md of the library folder.
+
+## #TODO
+
+- Tag tasks so we can have a an install task (always run unless skipped) and some optional task such as 
+    change password, update, dump database, ...)  

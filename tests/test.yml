@@ -26,12 +26,13 @@
 # Then apache
     - geerlingguy.apache
     - geerlingguy.php
-
     - geerlingguy.git
-    - role_under_test
 # Then PHP Database libraries
     - name: geerlingguy.php-mysql
       when: dbengine == "mysql"
     - name: geerlingguy.php-pgsql
       when: dbengine == "postgres"
-
+# Other dependencies such as composer
+    - name: geerlingguy.composer
+# Finally the role under test
+    - role_under_test

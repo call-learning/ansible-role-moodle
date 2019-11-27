@@ -55,7 +55,6 @@ moodle_extra_conf:
 # Additional database options
 moodle_extra_db_options: []
 
-
 # If set to no, do not launch setup database/config file
 moodle_run_config: yes
 
@@ -63,4 +62,6 @@ shared_drive_subfolder_create: true
 
 patch_to_apply: []
 
-
+moosh_repository : "https://github.com/call-learning/moosh.git"
+moosh_branch: "laurentd/additional-commands"
+moosh_install_directory: "/srv/moosh"

@@ -1,0 +1,39 @@
+---
+# Here we assume that composer has been installed
+# See https://github.com/geerlingguy/ansible-role-composer for the role to install composer
+
+- name: Check if composer is installed
+  command: composer --version >/dev/null 2>&1
+  register: composer_installed
+  failed_when:
+    - composer_installed.rc != 0
+  changed_when: False
+
+- name: Check if Moosh is installed
+  stat: "path={{ moosh_install_directory }}"
+  register: moosh_dir_status
+
+- name: Moosh - get from repository and install or update
+  block:
+    - name: Moosh - clone repository
+      git:
+        repo:    "{{ moosh_repository }}"
+        dest:    "{{ moosh_install_directory }}"
+        version: "{{ moosh_branch  |default(omit) }}"
+        update:  yes
+        depth: 1
+    - name: Moosh - Install moosh dependencies
+      command: >
+        composer install
+      args:
+        chdir: "{{ moosh_install_directory }}"
+    - name: Moosh - link to Moosh binary
+      file:
+        src: "{{ moosh_install_directory }}/moosh.php"
+        dest: /usr/local/bin/moosh
+        owner: "{{ moodle_webserver_user }}"
+        group: "{{ moodle_webserver_group }}"
+        state: link
+  when: not moosh_dir_status.stat.exists
+
+

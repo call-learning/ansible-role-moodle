@@ -1,46 +1,61 @@
-from nose.tools import assert_equals, assert_false, assert_true
-from check_moodle import CheckMoodle
 import json
 import subprocess
 
+from nose.tools import assert_equals, assert_false, assert_true, assert_raises
+
+from check_moodle import CheckMoodle
+
+# Here we just test the behaviour of the function check_moodle and ignore the rest
 class MockedCheckMoodle(CheckMoodle):
     __is_php_installed = False
     __moodle_check_return = ""
 
-    def __init__(self, install_dir, php_installed, check_moodle_return):
+    def __init__(self, install_dir, php_installed = False , moosh_installed = False, check_moodle_return = None):
         super(self.__class__, self).__init__(install_dir)
         self.__is_php_installed = php_installed
+        self.__is_moosh_installed = moosh_installed
         self.__moodle_check_return = check_moodle_return
 
-    def do_check_php_cli_installed(self):
+    def _check_php_cli_installed(self):
         if not self.__is_php_installed:
             raise subprocess.CalledProcessError(127, "php -v")
 
-    def do_check_moodle(self):
-        return json.loads(self.__moodle_check_return)
+    def _check_moosh_installed(self):
+        if not self.__is_moosh_installed:
+            raise subprocess.CalledProcessError(127, "moosh -v")
+
+    def _check_moodle(self):
+        if self.__moodle_check_return:
+            expectedreturnvalue = json.loads(self.__moodle_check_return)
+            if expectedreturnvalue.get('error', False):
+                raise AttributeError(self.__moodle_check_return.errormsg)
+            else:
+                return expectedreturnvalue
+        return None
 
 
 def test_check_php_not_installed():
-    moodlecheck = MockedCheckMoodle("/var/www/moodle/",False, "")
-    retvalue = moodlecheck.check_moodle()
-    assert_equals(retvalue['errorcode'], CheckMoodle.error_php_not_present['code'])
+    moodlecheck = MockedCheckMoodle("/var/www/moodle/")
+    with assert_raises(subprocess.CalledProcessError):
+        retvalue = moodlecheck.check_moodle()
+
 
 def test_check_wrong_moodle_path():
-    moodlecheck = MockedCheckMoodle("/var/www/moodle/",True,
-                                    '{"error":true,"errorcode":"wrongmoodlepath","errormsg":"Wrong Moodle Path","oldversion":"","newversion":"","moodle_need_upgrading":false}')
-    retvalue = moodlecheck.check_moodle()
-    assert_equals(retvalue['errorcode'], "wrongmoodlepath")
+    moodlecheck = MockedCheckMoodle("/var/www/moodle/", True, True,
+                                    '{"error":true,"errormsg":"Wrong Moodle Path","current_version":"","moodle_need_upgrading":false}')
+    with assert_raises(AttributeError):
+        retvalue = moodlecheck.check_moodle()
+
 
 def test_check_moodle_not_installed():
-    moodlecheck = MockedCheckMoodle("/var/www/moodle/",True,
-                                    '{"error":false,"errorcode":"","errormsg":"","oldversion":"","newversion":"","moodle_need_upgrading":false,"moodle_is_installed":false}')
+    moodlecheck = MockedCheckMoodle("/var/www/moodle/", True, True,
+                                    '{"error":false,"errormsg":"","current_version":"","moodle_need_upgrading":false,"moodle_is_installed":false}')
     retvalue = moodlecheck.check_moodle()
-    assert_equals(retvalue['errorcode'], "")
     assert_false(retvalue['moodle_is_installed'])
 
+
 def test_check_moodle_needs_upgrading():
-    moodlecheck = MockedCheckMoodle("/var/www/moodle/",True,
-                                    '{"error":false,"errorcode":"","errormsg":"","oldversion":"","newversion":"","moodle_need_upgrading":true,"moodle_is_installed":true}')
+    moodlecheck = MockedCheckMoodle("/var/www/moodle/", True, True,
+                                    '{"error":false,"errormsg":"","current_version":"","moodle_need_upgrading":true,"moodle_is_installed":true}')
     retvalue = moodlecheck.check_moodle()
-    assert_equals(retvalue['errorcode'], "")
     assert_true(retvalue['moodle_need_upgrading'])
