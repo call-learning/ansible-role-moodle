@@ -47,14 +47,19 @@ class CheckMoodle(object):
 
         if not os.path.exists(os.path.join(self.install_dir, 'config.php')):
             return retvalue
-
-        version = subprocess.check_output(["moosh", "-p", self.install_dir, "config-get", "moodle", "version"])
-        if version:
-            retvalue["current_version"] = version.strip()
-        needsupgrade = subprocess.check_output(["moosh", "-p", self.install_dir, "check-needsupgrade"])
-        if needsupgrade:
-            retvalue["moodle_needs_upgrading"] = needsupgrade.strip() == '1'
-
+        try:
+            version = subprocess.check_output(["moosh", "-p", self.install_dir, "config-get", "moodle", "version"])
+            if version:
+                retvalue["current_version"] = version.strip()
+            needsupgrade = subprocess.check_output(["moosh", "-p", self.install_dir, "check-needsupgrade"])
+            if needsupgrade:
+                retvalue["moodle_needs_upgrading"] = needsupgrade.strip() == '1'
+        except subprocess.CalledProcessError as e:
+            raise Exception(
+                "Check Moodle: {command} ({errorcode}) : {output}".format(
+                    command=e.cmd, output=e.output, errorcode=str(e.returncode)
+                )
+            )
         return retvalue
 
     """ Checks if mooodle is installed or not
