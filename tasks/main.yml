@@ -16,15 +16,15 @@
   register: moodle_state
 
 - name: Moodle - create config and install moodle
-  block:
-    - template:
-        src: config.php.j2
-        dest: "{{ moodle_src_path }}/config.php"
-        mode: 0644
-        owner: "{{ moodle_webserver_user }}"
-        group: "{{ moodle_webserver_group }}"
-      notify: install moodle
-  when: moodle_run_config|bool and moodle_site_source_stat is defined and not moodle_state.moodle_is_installed|bool
+  template:
+    src: config.php.j2
+    dest: "{{ moodle_src_path }}/config.php"
+    mode: 0644
+    owner: "{{ moodle_webserver_user }}"
+    group: "{{ moodle_webserver_group }}"
+    backup: yes # take a backup just in case
+  notify: install moodle
+  when: moodle_run_config|bool and moodle_site_source_stat is defined
 
 - name: Moodle - Launch update (if needed)
   command:  /bin/true
