@@ -9,12 +9,6 @@
     that: "ansible_version.full is version_compare('2.5', '>=')"
     msg: "You must update Ansible to at least 2.5 to use this role."
 
-# This is using our custom module to check moodle state
-- name: Moodle - Check the state of current moodle
-  check_moodle:
-    install_dir: "{{ moodle_src_path }}"
-  register: moodle_state
-
 - name: Moodle - create config and install moodle
   template:
     src: config.php.j2
@@ -23,19 +17,41 @@
     owner: "{{ moodle_webserver_user }}"
     group: "{{ moodle_webserver_group }}"
     backup: yes # take a backup just in case
-  notify: install moodle
+  notify:
+    - install moodle
   when: moodle_run_config|bool and moodle_site_source_stat is defined
+
+# This is using our custom module to check moodle state
+- name: Moodle - Check the state of current moodle
+  check_moodle:
+    install_dir: "{{ moodle_src_path }}"
+  register: moodle_state
+
+- debug:
+    msg: "{{ moodle_state }}"
+
+- name: Moodle - If moodle still not installed, then trigger handler to make sure
+  command:  /bin/true
+  notify:
+    - install moodle
+  when: not moodle_state.moodle_is_installed|bool
+
+# Make sure all handlers are executed after this point
+- name: Make sure all handlers are flushed beyon this point
+  meta: flush_handlers
 
 - name: Moodle - Launch update (if needed)
   command:  /bin/true
-  notify: upgrade moodle
+  notify:
+    - upgrade moodle
   when: moodle_run_config|bool and moodle_site_source_stat is defined and moodle_state.moodle_needs_upgrading|bool
 
 # Change password to make sure we are always in sync
 # Watch out this will work on Moodle where the reset_password.php command accepts arguments
 - name: Moodle - Change admin password
   command: >
-    php admin/cli/reset_password.php -u {{ moodle_site_admin.username }} -p {{ moodle_site_admin.password }} -i
+    php admin/cli/reset_password.php -u="{{ moodle_site_admin.username }}" -p="{{ moodle_site_admin.password }}"
   args:
     chdir: "{{ moodle_src_path }}"
   when: moodle_site_source_stat is defined and moodle_state.moodle_is_installed|bool
+  changed_when: False

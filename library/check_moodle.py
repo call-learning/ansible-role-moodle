@@ -51,15 +51,18 @@ class CheckMoodle(object):
             version = subprocess.check_output(["moosh", "-p", self.install_dir, "config-get", "moodle", "version"])
             if version:
                 retvalue["current_version"] = version.strip()
+                retvalue["moodle_is_installed"] = True
             needsupgrade = subprocess.check_output(["moosh", "-p", self.install_dir, "check-needsupgrade"])
             if needsupgrade:
                 retvalue["moodle_needs_upgrading"] = needsupgrade.strip() == '1'
         except subprocess.CalledProcessError as e:
-            raise Exception(
-                "Check Moodle: {command} ({errorcode}) : {output}".format(
-                    command=e.cmd, output=e.output, errorcode=str(e.returncode)
+            if e.output.strip() != "Error: No admin account was found":
+                raise Exception(
+                    "Check Moodle: {command} ({errorcode}) : {output}".format(
+                        command=e.cmd, output=e.output, errorcode=str(e.returncode)
+                    )
                 )
-            )
+            # Else moodle is here but we not yet installed
         return retvalue
 
     """ Checks if mooodle is installed or not
