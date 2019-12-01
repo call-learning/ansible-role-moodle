@@ -25,6 +25,8 @@
 - name: Moodle - Check the state of current moodle
   check_moodle:
     install_dir: "{{ moodle_src_path }}"
+  become: yes
+  become_user: "{{ moodle_webserver_user }}"
   register: moodle_state
 
 - debug:
@@ -54,4 +56,6 @@
   args:
     chdir: "{{ moodle_src_path }}"
   when: moodle_site_source_stat is defined and moodle_state.moodle_is_installed|bool
+  become: yes
+  become_user: "{{ moodle_webserver_user }}"
   changed_when: False
