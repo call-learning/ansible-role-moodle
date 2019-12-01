@@ -56,7 +56,7 @@ class CheckMoodle(object):
             if needsupgrade:
                 retvalue["moodle_needs_upgrading"] = needsupgrade.strip() == '1'
         except subprocess.CalledProcessError as e:
-            if e.output.strip() != "Error: No admin account was found":
+            if "Error: No admin account was found".upper() not in str(e.output).upper():
                 raise Exception(
                     "Check Moodle: {command} ({errorcode}) : {output}".format(
                         command=e.cmd, output=e.output, errorcode=str(e.returncode)
