@@ -65,3 +65,6 @@ patch_to_apply: []
 moosh_repository : "https://github.com/call-learning/moosh.git"
 moosh_branch: "laurentd/additional-commands"
 moosh_install_directory: "/srv/moosh"
+
+# Moodle cron periodicity in minutes
+moodle_cron_periodicity: 5

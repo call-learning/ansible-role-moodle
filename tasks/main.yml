@@ -59,3 +59,10 @@
   become: yes
   become_user: "{{ moodle_webserver_user }}"
   changed_when: False
+
+- name: Moodle - setup cron
+  cron:
+    name: "Moodle Cron"
+    minute: "{{ moodle_cron_periodicity }}"
+    job: "php {{ moodle_src_path }}/admin/cli/cron.php 2>&1"
+    user: "{{ moodle_webserver_user }}"
