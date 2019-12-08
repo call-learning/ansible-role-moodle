@@ -66,3 +66,4 @@
     minute: "{{ moodle_cron_periodicity }}"
     job: "php {{ moodle_src_path }}/admin/cli/cron.php 2>&1"
     user: "{{ moodle_webserver_user }}"
+  when: moodle_cron_periodicity is defined and moodle_cron_periodicity != 0
