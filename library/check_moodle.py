@@ -81,7 +81,8 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             install_dir=dict(required=True)
-        )
+        ),
+        supports_check_mode=True
     )
     install_dir = module.params.get('install_dir')
 
