@@ -1,0 +1,35 @@
+---
+
+- name: Converge
+  hosts: all
+  become: true
+
+  vars_files:
+    - test-vars.yml
+
+  pre_tasks:
+    - include: test-setup.yml
+    - debug:
+        msg: "System {{ moodle_database }} "
+
+  roles:
+    - name: geerlingguy.repo-remi
+      when: ansible_os_family == "RedHat"
+# Database install
+    - name: geerlingguy.postgresql
+      when: dbengine == "postgres"
+    - name: geerlingguy.mysql
+      when: dbengine == "mysql"
+# Then apache
+    - geerlingguy.apache
+    - geerlingguy.php
+    - geerlingguy.git
+# Then PHP Database libraries
+    - name: geerlingguy.php-mysql
+      when: dbengine == "mysql"
+    - name: geerlingguy.php-pgsql
+      when: dbengine == "postgres"
+# Other dependencies such as composer
+    - name: geerlingguy.composer
+# Finally the role under test
+    - name: ansible-role-moodle
