@@ -50,11 +50,12 @@
 
 # Change password to make sure we are always in sync
 # Watch out this will work on Moodle where the reset_password.php command accepts arguments
+# Added the cache purge as sometimes old users are cached when db is replaced
 - name: Moodle - Change admin password
-  command: >
-    php admin/cli/reset_password.php -u="{{ moodle_site_admin.username }}" -p="{{ moodle_site_admin.password }}"
-  args:
-    chdir: "{{ moodle_src_path }}"
+  command: chdir="{{ moodle_src_path }}" {{ item }}
+  with_items:
+    - php admin/cli/purge_caches.php
+    - php admin/cli/reset_password.php --username="{{ moodle_site_admin.username }}" --password="{{ moodle_site_admin.password }}"
   when: moodle_site_source_stat is defined and moodle_state.moodle_is_installed|bool
   become: yes
   become_user: "{{ moodle_webserver_user }}"
