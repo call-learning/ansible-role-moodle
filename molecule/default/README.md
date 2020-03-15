@@ -1,26 +1,28 @@
 # Ansible Role tests 
 
 This now uses Molecule. You need to install it and all dependencies to be able to 
-run the tests. We will use goss for the tests
+run the tests. 
+We use molecule 3.x version.
 
 ```bash
     pip uninstall -y docker docker-py
-    pip install docker docker-compose molecule==2.22 molecule-goss
+    pip install molecule ansible-lint docker flake8 yamllint
 ```
 
 
 To launch the test do:
 
 ```bash
-    molecule check
+    molecule test
 ```
 
 
 ## Checking the container
 
+
 ```bash
-    container_id=xxxxyyy
-    docker exec -it --tty $container_id env TERM=xterm bash
+    molecule converge
+    molecule login
 ```
 
 

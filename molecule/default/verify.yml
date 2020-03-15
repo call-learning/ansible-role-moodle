@@ -1,74 +1,56 @@
 ---
-# This is an example playbook to execute goss tests.
-# Tests need distributed to the appropriate ansible host/groups
-# prior to execution by `goss validate`.
 
 - name: Verify
   hosts: all
   become: true
+
   vars:
-    goss_version: v0.3.7
-    goss_arch: amd64
-    goss_bin: /usr/local/bin/goss
-    goss_sha256sum: 357f5c7f2e7949b412bce44349cd32ab19eb3947255a8ac805f884cc2c326059.
-    goss_test_directory: /tmp/molecule/goss
-    goss_format: documentation
+    files_to_check:
+      - "{{ moodle_src_path }}"
+      - "{{ moodle_dataroot }}"
+      - "{{ moodle_localcachedir }}"
+      - "{{ moodle_tempdir }}"
+      - "{{ moodle_sharedcachedir }}"
+      - "{{ moodle_src_path }}/config.php"
+  vars_files:
+    - vars.yml
+
+  pre_tasks:
+    - include: setup.yml
+    - debug:
+        msg: "System {{ moodle_database }} "
+
+  roles:
+    - name: ansible-role-moodle
+      tags: only-vars
+
+
   tasks:
-    - name: Download and install Goss
-      get_url:
-        url: "https://github.com/aelsabbahy/goss/releases/download/{{ goss_version }}/goss-linux-{{ goss_arch }}"
-        dest: "{{ goss_bin }}"
-        sha256sum: "{{ goss_sha256sum }}"
-        mode: 0755
+    - name: Check that all directories and files have been created
+      include_tasks: tools/check-exists.yml
+      loop: "{{ files_to_check }}"
 
-    - name: Create Molecule directory for test files
-      file:
-        path: "{{ goss_test_directory }}"
-        state: directory
+    - name: Get Moodle current configuration
+      check_moodle:
+        install_dir: "{{ moodle_src_path }}"
+      become: true
+      become_user: "{{ moodle_webserver_user }}"
+      register: moodle_state
 
-    - name: Find Goss tests on localhost
-      find:
-        paths: "{{ lookup('env', 'MOLECULE_VERIFIER_TEST_DIRECTORY') }}"
-        patterns:
-          - "test[-.\\w]*.yml"
-          - "test_host_{{ ansible_hostname }}[-.\\w]*.yml"
-        excludes:
-          - "test_host_(?!{{ ansible_hostname }})[-.\\w]*.yml"
-        use_regex: true
-      delegate_to: localhost
-      register: test_files
-      changed_when: false
-      become: false
+    - name: Check that Moodle is installed
+      assert:
+        that: moodle_state.moodle_is_installed
 
-    - name: debug
-      debug:
-        msg: "{{ test_files.files }}"
-        verbosity: 3
+    - name: Check that Moodle has the right version
+      assert:
+        that:
+          - "moodle_state.current_release == '3.8.2 (Build: 20200309)'"
 
-    - name: Copy Goss tests to remote
-      copy:
-        src: "{{ item.path }}"
-        dest: "{{ goss_test_directory }}/{{ item.path | basename }}"
-      with_items:
-        - "{{ test_files.files }}"
+    - name: Get the site frontpage
+      action: uri url=http://moodle.test return_content=yes
+      register: webpage
 
-    - name: Register test files
-      shell: "ls {{ goss_test_directory }}/test_*.yml"
-      register: test_files
-
-    - name: Execute Goss tests
-      command: "{{ goss_bin }} -g {{ item }} validate --format {{ goss_format }}"
-      register: test_results
-      with_items: "{{ test_files.stdout_lines }}"
-      failed_when: false
-
-    - name: Display details about the Goss results
-      debug:
-        msg: "{{ item.stdout_lines }}"
-      with_items: "{{ test_results.results }}"
-
-    - name: Fail when tests fail
-      fail:
-        msg: "Goss failed to validate"
-      when: item.rc != 0
-      with_items: "{{ test_results.results }}"
+    - name: Check that the page contains
+      assert:
+        that:
+          - "'<h1>Moodle</h1>' in webpage.content"

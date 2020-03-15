@@ -7,24 +7,20 @@ env:
     - ROLE_NAME: moodle
   matrix:
     - MOLECULE_DISTRO: centos7
-    - MOLECULE_DISTRO: centos6
+    - MOLECULE_DISTRO: centos8
     - MOLECULE_DISTRO: ubuntu1804
     - MOLECULE_DISTRO: ubuntu1604
+    - MOLECULE_DISTRO: debian9
     - MOLECULE_DISTRO: debian10
 
 install:
   # Install test dependencies.
-  - pip install molecule-goss docker
-
-#before_script:
-# Use actual Ansible Galaxy role name for the project directory.
-#  - cd ../
-#  - mv ansible-role-$ROLE_NAME call-learning.$ROLE_NAME
-#  - cd call-learning.$ROLE_NAME
+  - pip install molecule ansible-lint docker flake8 yamllint nose
 
 script:
   # Run tests.
   - molecule test
+  - nosetests -library/test_check_moodle.py
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/

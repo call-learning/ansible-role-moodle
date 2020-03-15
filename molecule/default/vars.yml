@@ -1,9 +1,10 @@
 ---
-
 php_enable_webserver: false
-php_enablerepo: "remi,remi-php71"
+php_version: '7.2'
 php_enable_php_fpm: true
 php_fpm_listen: "127.0.0.1:9000"
+mysql_python_package_debian: python3-mysqldb
+
 
 apache_mods_enabled:
   - expires.load
@@ -17,9 +18,9 @@ apache_vhosts:
     serveralias: "www.{{ moodle_domain_name }}"
     documentroot: "{{ moodle_src_path }}"
     extra_parameters: |
-          <FilesMatch \.php$>
-            SetHandler "proxy:fcgi://{{ php_fpm_listen }}"
-          </FilesMatch>
+      <FilesMatch \.php$>
+        SetHandler "proxy:fcgi://{{ php_fpm_listen }}"
+      </FilesMatch>
 
 mysql_enablerepo: "remi"
 
@@ -46,11 +47,7 @@ mysql_users:
 
 dbengine: "mysql"
 
-patch_to_apply:
-  - aurora
-
-
-moodle_version: "MOODLE_34_STABLE" # Tag or branch name
+moodle_version: "v3.8.2"
 
 # Moodle database details
 moodle_database:

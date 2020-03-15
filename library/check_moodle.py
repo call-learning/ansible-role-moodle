@@ -6,7 +6,8 @@ from ansible.module_utils.basic import AnsibleModule
 
 
 class CheckMoodle(object):
-    """This class will check if the moodle installed in the install_dir and conduct the following checks:
+    """This class will check if the moodle installed in the install_dir and
+        conduct the following checks:
         - Check that PHP cli is installed (prerequisite)
         - The configuration file is present and we can connect to the database
         - The database has been installed/setup
@@ -17,24 +18,28 @@ class CheckMoodle(object):
         self.install_dir = install_dir
 
     def _check_php_cli_installed(self):
-        """ Check if PHP is installed. This should be a private method but stayed public for unit testing
+        """ Check if PHP is installed. This should be a private method but
+            stayed public for unit testing
         """
         subprocess.check_call(["php", "-v"])
 
     def _check_moosh_installed(self):
-        """ Check if Moosh is installed. This should be a private method but stayed public for unit testing
+        """ Check if Moosh is installed. This should be a private method but
+            stayed public for unit testing
         """
         try:
             subprocess.check_call(["moosh", "-h"])
         except subprocess.CalledProcessError as e:
             if e.returncode != 10:
-                raise e  # Moosh returns a silly return code of 10 when no command provided
+                raise e  # Moosh returns a silly return code of 10
+                # when no command provided
 
     def _check_moodle(self):
         """ Check if Moodle is installed and / or configured.
         """
         # Check first that the directory exists
-        if not os.path.exists(self.install_dir): raise AttributeError('Invalid moodle source path')
+        if not os.path.exists(self.install_dir):
+            raise AttributeError('Invalid moodle source path')
 
         if not os.path.exists(os.path.join(self.install_dir, 'version.php')):
             raise AttributeError('No version.php found in this path')
@@ -48,18 +53,31 @@ class CheckMoodle(object):
         if not os.path.exists(os.path.join(self.install_dir, 'config.php')):
             return retvalue
         try:
-            version = subprocess.check_output(["moosh", "-p", self.install_dir, "config-get", "moodle", "version"])
+            version = subprocess.check_output(
+                ["moosh", "-p", self.install_dir, "config-get", "moodle",
+                 "version"])
             if version:
                 retvalue["current_version"] = version.strip()
                 retvalue["moodle_is_installed"] = True
-            needsupgrade = subprocess.check_output(["moosh", "-p", self.install_dir, "check-needsupgrade"])
+
+            release = subprocess.check_output(
+                    ["moosh", "-p", self.install_dir, "config-get", "moodle",
+                     "release"])
+            if release:
+                retvalue["current_release"] = release.strip()
+
+            needsupgrade = subprocess.check_output(
+                ["moosh", "-p", self.install_dir, "check-needsupgrade"])
             if needsupgrade:
-                retvalue["moodle_needs_upgrading"] = needsupgrade.strip() == '1'
+                retvalue[
+                    "moodle_needs_upgrading"] = needsupgrade.strip() != '0'
         except subprocess.CalledProcessError as e:
-            if "Error: No admin account was found".upper() not in str(e.output).upper():
+            if "Error: No admin account was found".upper() not in str(
+                    e.output).upper():
                 raise Exception(
                     "Check Moodle: {command} ({errorcode}) : {output}".format(
-                        command=e.cmd, output=e.output, errorcode=str(e.returncode)
+                        command=e.cmd, output=e.output,
+                        errorcode=str(e.returncode)
                     )
                 )
             # Else moodle is here but we not yet installed
@@ -92,14 +110,17 @@ def main():
         module.exit_json(
             msg="",
             code="",
+            moodle_is_installed=retvalue["moodle_is_installed"],
             moodle_needs_upgrading=retvalue["moodle_needs_upgrading"],
             current_version=retvalue["current_version"],
-            moodle_is_installed=retvalue["moodle_is_installed"])
+            current_release=retvalue["current_release"])
 
     except subprocess.CalledProcessError as e:
         module.fail_json(
-            msg="Requirements not present (phpcli or moosh): {command} ({errorcode}) : {output}"
-                .format(command=e.cmd, output=e.output, errorcode=str(e.returncode)),
+            msg="Requirements not present (phpcli or moosh): {command} "
+                "({errorcode}) : {output}"
+                .format(command=e.cmd, output=e.output,
+                        errorcode=str(e.returncode)),
             code="phpcliormooshnotpresent"
         )
     except Exception as e:

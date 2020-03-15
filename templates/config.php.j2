@@ -9,7 +9,7 @@
 //                                                                       //
 // NOTICE OF COPYRIGHT                                                   //
 //                                                                       //
-// Moodle - Modular Object-Oriented Dynamic Learning Environment         //
+// Moodle Modular Object-Oriented Dynamic Learning Environment         //
 //          http://moodle.org                                            //
 //                                                                       //
 // Copyright (C) 1999 onwards  Martin Dougiamas  http://moodle.com       //
@@ -103,7 +103,7 @@ $CFG->wwwroot   = '{{ (moodle_is_https) | ternary('https://','http://')}}{{ mood
 //
 // - On Windows systems you might specify something like 'c:\moodledata'
 
-$CFG->dataroot  = '{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.data_dir_name }}';
+$CFG->dataroot  = '{{ moodle_dataroot }}';
 
 
 //=========================================================================
@@ -427,12 +427,16 @@ $CFG->admin = 'admin';
 // The directories must not be accessible via web.
 //
 
-// Directory MUST BE SHARED by all cluster nodes.
-$CFG->tempdir = '{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.temp_dir_name }}';
-// Directory MUST BE SHARED by all cluster nodes, locking required.
-$CFG->cachedir = '{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.cache_dir_name }}';
+{% if shared_drive_subfolder_create %}
 
-$CFG->localcachedir = '{{ moodle_sitedata.local_data_folder }}/{{ moodle_sitedata.cache_dir_name }}';
+// Directory MUST BE SHARED by all cluster nodes.
+$CFG->tempdir = '{{ moodle_tempdir }}';
+// Directory MUST BE SHARED by all cluster nodes, locking required.
+$CFG->cachedir = '{{ moodle_sharedcachedir }}';
+$CFG->localcachedir = '{{ moodle_localcachedir }}';
+
+{% endif %}
+
 // Intended for local node caching.
 //
 // Some filesystems such as NFS may not support file locking operations.
@@ -597,12 +601,12 @@ $CFG->localcachedir = '{{ moodle_sitedata.local_data_folder }}/{{ moodle_sitedat
 //   http://yuilibrary.com/yui/docs/api/classes/config.html#property_logInclude
 //   http://yuilibrary.com/yui/docs/api/classes/config.html#property_logExclude
 // $CFG->yuiloginclude = array(
-//     'moodle-core-dock-loader' => true,
-//     'moodle-course-categoryexpander' => true,
+//     'Moodle core-dock-loader' => true,
+//     'Moodle course-categoryexpander' => true,
 // );
 // $CFG->yuilogexclude = array(
-//     'moodle-core-dock' => true,
-//     'moodle-core-notification' => true,
+//     'Moodle core-dock' => true,
+//     'Moodle core-notification' => true,
 // );
 //
 // Set the minimum log level for YUI logging statements.

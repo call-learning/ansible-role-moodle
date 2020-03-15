@@ -3,7 +3,7 @@
 # You can run this script by providing this playbook and the value of a real moodle install
 
 - hosts: localhost
-  gather_facts: yes
+  gather_facts: true
   connection: local
 
   tasks:

@@ -3,7 +3,7 @@
 This module is intended to check Moodle state (installed, to be upgraded) so we can take decision regarding
 what needs to be done in term of setting it up.
 
-    - name: Moodle - Check the state of current moodle
+    - name: Check the state of current moodle
       check_moodle:
         install_dir: "{{ moodle_src_path }}"
       register: moodle_state

@@ -7,7 +7,8 @@
   register: composer_installed
   failed_when:
     - composer_installed.rc != 0
-  changed_when: False
+    - "Composer should be installed on the platform before running this script"
+  changed_when: false
 
 - name: Check if Moosh is installed
   stat: "path={{ moosh_install_directory }}"
@@ -17,10 +18,10 @@
   block:
     - name: Moosh - clone repository
       git:
-        repo:    "{{ moosh_repository }}"
-        dest:    "{{ moosh_install_directory }}"
+        repo: "{{ moosh_repository }}"
+        dest: "{{ moosh_install_directory }}"
         version: "{{ moosh_branch  |default(omit) }}"
-        update:  yes
+        update: true
         depth: 1
     - name: Moosh - Install moosh dependencies
       command: >
@@ -35,5 +36,3 @@
         group: "{{ moodle_webserver_group }}"
         state: link
   when: not moosh_dir_status.stat.exists
-
-

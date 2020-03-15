@@ -1,70 +1,25 @@
 ---
-
-- import_tasks: setupdirs.yml
-- import_tasks: fetchsources.yml
-- import_tasks: setupmoosh.yml
-
 - name: Verify Ansible meets version requirements
   assert:
-    that: "ansible_version.full is version_compare('2.5', '>=')"
-    msg: "You must update Ansible to at least 2.5 to use this role."
+    that: "ansible_version.full is version_compare('2.8', '>=')"
+    msg: "You must update Ansible to at least 2.8 to use this role."
 
-- name: Moodle - create config and install moodle
-  template:
-    src: config.php.j2
-    dest: "{{ moodle_src_path }}/config.php"
-    mode: 0644
-    owner: "{{ moodle_webserver_user }}"
-    group: "{{ moodle_webserver_group }}"
-    backup: yes # take a backup just in case
-  notify:
-    - install moodle
-  when: moodle_run_config|bool and moodle_site_source_stat is defined
 
-# This is using our custom module to check moodle state
-- name: Moodle - Check the state of current moodle
-  check_moodle:
-    install_dir: "{{ moodle_src_path }}"
-  become: yes
-  become_user: "{{ moodle_webserver_user }}"
-  register: moodle_state
+- name: Setup additional vars
+  import_tasks: configure-vars.yml
+  tags:
+    - only-vars
+    - always
 
-- debug:
-    msg: "{{ moodle_state }}"
+- name: Setup Moosh
+  import_tasks: setup-moosh.yml
 
-- name: Moodle - If moodle still not installed, then trigger handler to make sure
-  command:  /bin/true
-  notify:
-    - install moodle
-  when: not moodle_state.moodle_is_installed|bool
+- name: Setup all Directories
+  import_tasks: setup-dirs.yml
 
-# Make sure all handlers are executed after this point
-- name: Make sure all handlers are flushed beyon this point
-  meta: flush_handlers
+- name: Fetch source
+  import_tasks: fetch-sources.yml
 
-- name: Moodle - Launch update (if needed)
-  command:  /bin/true
-  notify:
-    - upgrade moodle
-  when: moodle_run_config|bool and moodle_site_source_stat is defined and moodle_state.moodle_needs_upgrading|bool
-
-# Change password to make sure we are always in sync
-# Watch out this will work on Moodle where the reset_password.php command accepts arguments
-# Added the cache purge as sometimes old users are cached when db is replaced
-- name: Moodle - Change admin password
-  command: chdir="{{ moodle_src_path }}" {{ item }}
-  with_items:
-    - php admin/cli/purge_caches.php
-    - php admin/cli/reset_password.php --username="{{ moodle_site_admin.username }}" --password="{{ moodle_site_admin.password }}"
-  when: moodle_site_source_stat is defined and moodle_state.moodle_is_installed|bool
-  become: yes
-  become_user: "{{ moodle_webserver_user }}"
-  changed_when: False
-
-- name: Moodle - setup cron
-  cron:
-    name: "Moodle Cron"
-    minute: "{{ moodle_cron_periodicity }}"
-    job: "php {{ moodle_src_path }}/admin/cli/cron.php 2>&1"
-    user: "{{ moodle_webserver_user }}"
-  when: moodle_cron_periodicity is defined and moodle_cron_periodicity != 0
+- name: Run setup and configuration.
+  import_tasks: setup-moodle.yml
+  when: moodle_run_config|bool

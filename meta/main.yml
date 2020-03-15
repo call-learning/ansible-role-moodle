@@ -1,23 +1,26 @@
 ---
-dependencies: []
+dependencies:
+  - role: geerlingguy.composer
 
 galaxy_info:
   author: laurentdavid
   description: Moodle CentOS/Debian/Ubuntu.
   company: "CALL Learning"
   license: "license (BSD, MIT)"
-  min_ansible_version: 2.5
+  min_ansible_version: 2.8
   platforms:
-  - name: Debian
-    versions:
-    - stretch
-  - name: Ubuntu
-    versions:
-    - xenial
-    - trusty
-  - name: EL
-    versions:
-    - 7
+    - name: Debian
+      versions:
+        - strech
+        - buster
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+    - name: EL
+      versions:
+        - 7
+        - 8
   galaxy_tags:
     - development
     - web

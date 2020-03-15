@@ -1,0 +1,12 @@
+---
+
+- name: Setup Solr
+  command: chdir="{{ moodle_src_path }}" {{ item }}
+  loop:
+    - php admin/cli/purge_caches.php
+    - moosh config-set searchengine solr
+    - moosh config-set server_hostname {{ solr_server_host }} search_solr
+    - moosh config-set indexname {{ moodle_solr_collection_name }} search_solr
+  become: true
+  become_user: "{{ moodle_webserver_user }}"
+  changed_when: false

@@ -2,10 +2,10 @@
 - hosts: all
 
   vars_files:
-    - test-vars.yml
+    - vars.yml
 
   pre_tasks:
-    - include: test-setup.yml
+    - include: setup.yml
 
   roles:
     - name: geerlingguy.repo-remi
@@ -18,10 +18,12 @@
     - role_under_test
 
   tasks:
-    - name: Moodle - Trigger installation
+    - name: Trigger installation
       command: /bin/true
       notify: install moodle
+      changed_when: false
 
-    - name: Moodle - Trigger installation
+    - name: Trigger installation
       command: /bin/true
       notify: update moodle
+      changed_when: false
