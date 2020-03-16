@@ -1,6 +1,6 @@
 ---
 
-- name: create config if it does not exist
+- name: Create config if it does not exist
   template:
     src: config.php.j2
     dest: "{{ moodle_src_path }}/config.php"
@@ -25,11 +25,11 @@
 # Watch out this will work on Moodle where the reset_password.php command accepts arguments
 # Added the cache purge as sometimes old users are cached when db is replaced
 - name: Change admin password
-  include_tasks: commands/moodle-resetpw.yml
+  import_tasks: commands/moodle-resetpw.yml
   when: moodle_state.moodle_is_installed|bool
 
 - name: Launch update (if needed)
-  include_tasks: commands/moodle-update.yml
+  import_tasks: commands/moodle-update.yml
   when: moodle_state.moodle_is_installed|bool
     and moodle_state.moodle_needs_upgrading|bool
 

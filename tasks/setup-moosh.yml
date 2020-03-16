@@ -3,11 +3,9 @@
 # See https://github.com/geerlingguy/ansible-role-composer for the role to install composer
 
 - name: Check if composer is installed
-  command: composer --version >/dev/null 2>&1
+  command: "{{ composer_path }} --version"
   register: composer_installed
-  failed_when:
-    - composer_installed.rc != 0
-    - "Composer should be installed on the platform before running this script"
+  failed_when: composer_installed.rc != 0
   changed_when: false
 
 - name: Check if Moosh is installed
@@ -23,16 +21,29 @@
         version: "{{ moosh_branch  |default(omit) }}"
         update: true
         depth: 1
+      changed_when: false
     - name: Moosh - Install moosh dependencies
-      command: >
-        composer install
+      command: "{{ composer_path }} install"
       args:
         chdir: "{{ moosh_install_directory }}"
-    - name: Moosh - link to Moosh binary
-      file:
-        src: "{{ moosh_install_directory }}/moosh.php"
-        dest: /usr/local/bin/moosh
-        owner: "{{ moodle_webserver_user }}"
-        group: "{{ moodle_webserver_group }}"
-        state: link
+      changed_when: false
   when: not moosh_dir_status.stat.exists
+
+- name: Make sure all moosh files belongs to the web user
+  file:
+    path: "{{ moosh_install_directory }}"
+    owner: "{{ moodle_webserver_user }}"
+    group: "{{ moodle_webserver_group }}"
+    mode: "u=rwx,g=rx,o=rx"
+    recurse: true
+
+# Note that the best place would be /usr/local/bin on Debian like system
+# But unfortunately the apache user has only /usr/bin in its path
+- name: Moosh - link to Moosh binary
+  file:
+    src: "{{ moosh_install_directory }}/moosh.php"
+    dest: /usr/bin/moosh
+    owner: "{{ moodle_webserver_user }}"
+    group: "{{ moodle_webserver_group }}"
+    state: link
+  changed_when: false

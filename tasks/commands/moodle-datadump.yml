@@ -1,0 +1,37 @@
+---
+
+- name: Set default dump folder if not set
+  set_fact:
+    local_dump_folder: "dumps"
+  when: not local_dump_folder is defined
+
+- name: Create local installation directory if it does not exist
+  file:
+    path: "{{ local_dump_folder }}"
+    state: directory
+  delegate_to: localhost
+  changed_when: false
+
+- name: Do a database dump
+  command: chdir="{{ moodle_src_path }}" "moosh sql-dump >/tmp/dbdump.sql"
+  changed_when: false
+
+- name: Compress archive
+  archive:
+    path: "/tmp/dbdump.sql"
+    dest: "/tmp/dbdump.sql.gz"
+    format: gz
+    force_archive: true
+  changed_when: false
+
+- name: Fetch archive
+  fetch:
+    src: "/tmp/dbdump.sql.gz"
+    flat: true
+    dest: "{{ local_dump_folder }}/moodledata-{{ inventory_hostname }}.{{ ansible_date_time.epoch }}.tar.gz"
+
+- name: Delete Archive
+  file:
+    state: absent
+    path: "/tmp/dbdump.sql.gz"
+  changed_when: false

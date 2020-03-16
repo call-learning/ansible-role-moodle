@@ -19,6 +19,7 @@
     group: "{{ moodle_webserver_group }}"
     mode: "u=rwx,g=rwx,o=r"
     recurse: true
+  changed_when: false
   become: true
 
 - name: Create all standard data Directories

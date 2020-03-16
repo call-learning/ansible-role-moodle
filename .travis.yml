@@ -6,11 +6,8 @@ env:
   global:
     - ROLE_NAME: moodle
   matrix:
-    - MOLECULE_DISTRO: centos7
     - MOLECULE_DISTRO: centos8
     - MOLECULE_DISTRO: ubuntu1804
-    - MOLECULE_DISTRO: ubuntu1604
-    - MOLECULE_DISTRO: debian9
     - MOLECULE_DISTRO: debian10
 
 install:

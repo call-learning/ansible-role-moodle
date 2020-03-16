@@ -1,0 +1,39 @@
+---
+
+- name: Verify
+  hosts: all
+  become: true
+
+  vars:
+    files_to_check:
+      - "{{ moodle_src_path }}"
+      - "{{ moodle_dataroot }}"
+      - "{{ moodle_localcachedir }}"
+      - "{{ moodle_tempdir }}"
+      - "{{ moodle_sharedcachedir }}"
+      - "{{ moodle_src_path }}/config.php"
+  vars_files:
+    - ../default/vars.yml
+
+  pre_tasks:
+    - include: ../default/setup.yml
+    - debug:
+        msg: "System {{ moodle_database }} "
+
+  roles:
+    - name: ansible-role-moodle
+      tags: only-vars
+
+  tasks:
+    - name: Check the state of current moodle
+      check_moodle:
+        install_dir: "{{ moodle_src_path }}"
+      become: true
+      become_user: "{{ moodle_webserver_user }}"
+      register: moodle_state
+
+    - name: Check the version of moodle is the right one
+      assert:
+        that:
+          - "moodle_state.release  == '3.8.2 (Build: 20200309'"
+          - "not moodle_state.moodle_needs_upgrading|bool"

@@ -11,15 +11,12 @@ galaxy_info:
   platforms:
     - name: Debian
       versions:
-        - strech
         - buster
     - name: Ubuntu
       versions:
-        - xenial
         - bionic
     - name: EL
       versions:
-        - 7
         - 8
   galaxy_tags:
     - development

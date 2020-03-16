@@ -57,3 +57,5 @@ moodle_database:
   dbuser: "username"
   dbpass: "password"
   dbprefix: "mdl_"
+
+# mysql_root_password_update: true

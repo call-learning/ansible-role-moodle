@@ -18,7 +18,7 @@
   import_tasks: setup-dirs.yml
 
 - name: Fetch source
-  import_tasks: fetch-sources.yml
+  import_tasks: commands/moodle-fetchsources.yml
 
 - name: Run setup and configuration.
   import_tasks: setup-moodle.yml

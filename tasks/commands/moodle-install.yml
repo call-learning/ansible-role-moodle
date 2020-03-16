@@ -3,7 +3,7 @@
 - name: Moodle- Check before if installation directory exists
   stat:
     path: "{{ moodle_src_path }}/config.php"
-  register: moodle_config_source_stat
+  register: moodle_config_source
 
 - name: Run installer
   command: >
@@ -19,4 +19,4 @@
   become_user: "{{ moodle_webserver_user }}"
   register: installerresult
   changed_when: installerresult.rc != 0
-  when: moodle_config_source_stat.exists
+  when: moodle_config_source.stat.exists|bool

@@ -1,49 +1,22 @@
 ---
 - import_tasks: setup-moosh.yml
 
-- name: Tools - do data file dump
-  block:
-    - name: Archive data folder
-      archive:
-        path:
-          - "{{ moodle_sitedata.shared_data_folder }}"
-          - "{{ moodle_sitedata.local_data_folder }}"
-        dest: /tmp/moodledata.tar.gz
-    - name: Fetch archive
-      fetch:
-        src: /tmp/moodledata.tar.gz
-        flat: true
-        dest: dumps/moodledata-{{ inventory_hostname }}.{{ ansible_date_time.epoch }}.tar.gz
-    - name: Delete Archive
-      file:
-        state: absent
-        path: /tmp/moodledata.tar.gz
+- name: Tools - do file dump
+  import_tasks: commands/moodle-filedump.yml
   tags: ['never', 'task-filedump']
 
+- name: Tools - do a database dump
+  import_tasks: commands/moodle-datadump.yml
+  tags: ['never', 'task-datadump']
+
 - name: Tools - Retrieve the latest code on the given branch (including submodules)
-  git:
-    repo: "{{ moodle_git_url }}"
-    dest: "{{ moodle_src_path }}"
-    version: "{{ moodle_version }}"
-    depth: 1  # Only shallow cloning. Can be fixed if needed later to have the full history (git pull --unshallow)
-    key_file: "{{ moodle_git_key_file }}"
-    recursive: true
-    update: true
-  become: true
-  become_user: "{{ moodle_webserver_user }}"  # Check out as www-data
+  import_tasks: commands/moodle-fetchsources.yml
   notify:
     - upgrade moodle
   tags: ['never', 'task-updatecode']
 
 - name: Tools - Change admin password
-  command: chdir="{{ moodle_src_path }}" {{ item }}
-  loop:
-    - php admin/cli/purge_caches.php
-    - php admin/cli/reset_password.php --username="{{ moodle_site_admin.username }}"
-      --password="{{ moodle_site_admin.password }}"
-  become: true
-  become_user: "{{ moodle_webserver_user }}"
-  changed_when: false
+  import_tasks: commands/moodle-resetpw.yml
   tags: ['never', 'task-updatepassword']
 
 - name: Tools - Bootstrap Search SOLR
