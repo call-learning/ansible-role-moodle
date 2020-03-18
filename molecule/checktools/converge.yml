@@ -8,7 +8,12 @@
     - ../default/vars.yml
 
   pre_tasks:
-    - include: ../default/setup.yml
+    - name: Import Moodle PHP Setup role to set the web server config
+      import_role:
+        name: ansible-role-moodle
+        tasks_from: phpsql-setup
+        public: false
+      tags: install
     - name: Set Moodle version to 3.8.1 to update it later
       set_fact:
         moodle_version: "v3.8.1"
@@ -26,7 +31,6 @@
     - geerlingguy.apache
     - geerlingguy.php-versions
     - geerlingguy.php
-    - geerlingguy.git
     # Then PHP Database libraries
     - name: geerlingguy.php-mysql
       when: dbengine == "mysql"
@@ -34,6 +38,7 @@
       when: dbengine == "postgres"
     # Other dependencies such as composer
     - name: geerlingguy.composer
+    - name: geerlingguy.git
     # Finally the role under test
     - name: ansible-role-moodle
   post_tasks:

@@ -8,7 +8,11 @@
     - vars.yml
 
   pre_tasks:
-    - include: setup.yml
+    - name: Import Moodle PHP Setup role to set the web server config
+      include_role:
+        name: ansible-role-moodle
+        tasks_from: phpsql-setup
+      tags: install
     - debug:
         msg: "System {{ moodle_database }} "
   roles:
@@ -23,7 +27,6 @@
     - geerlingguy.apache
     - geerlingguy.php-versions
     - geerlingguy.php
-    - geerlingguy.git
     # Then PHP Database libraries
     - name: geerlingguy.php-mysql
       when: dbengine == "mysql"
@@ -31,5 +34,6 @@
       when: dbengine == "postgres"
     # Other dependencies such as composer
     - name: geerlingguy.composer
+    - name: geerlingguy.git
     # Finally the role under test
     - name: ansible-role-moodle

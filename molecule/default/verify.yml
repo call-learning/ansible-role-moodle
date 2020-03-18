@@ -16,7 +16,12 @@
     - vars.yml
 
   pre_tasks:
-    - include: setup.yml
+    - name: Import Moodle PHP Setup role to set the web server config
+      import_role:
+        name: ansible-role-moodle
+        tasks_from: phpsql-setup
+        public: false
+      tags: install
     - debug:
         msg: "System {{ moodle_database }} "
 
