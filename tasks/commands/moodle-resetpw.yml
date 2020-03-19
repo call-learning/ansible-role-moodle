@@ -9,3 +9,4 @@
   become: true
   become_user: "{{ moodle_webserver_user }}"
   changed_when: false
+  no_log: true

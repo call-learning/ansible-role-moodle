@@ -12,6 +12,7 @@
       - "{{ moodle_tempdir }}"
       - "{{ moodle_sharedcachedir }}"
       - "{{ moodle_src_path }}/config.php"
+    moodle_domain_name: "moodleupdate.test"  # We override this for the test
   vars_files:
     - ../default/vars.yml
 
@@ -20,7 +21,6 @@
       import_role:
         name: ansible-role-moodle
         tasks_from: phpsql-setup
-        public: false
     - debug:
         msg: "System {{ moodle_database }} "
 
@@ -39,5 +39,14 @@
     - name: Check the version of moodle is the right one
       assert:
         that:
-          - "moodle_state.release  == '3.8.2 (Build: 20200309'"
+          - "moodle_state.current_release == '3.8.2 (Build: 20200309)'"
           - "not moodle_state.moodle_needs_upgrading|bool"
+
+    - name: Get the site frontpage
+      action: uri url=http://moodleupdate.test return_content=yes
+      register: webpage
+
+    - name: Check that the page contains
+      assert:
+        that:
+          - "'<h1>Moodle</h1>' in webpage.content"

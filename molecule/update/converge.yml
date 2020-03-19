@@ -6,13 +6,14 @@
 
   vars_files:
     - ../default/vars.yml
+  vars:
+    moodle_domain_name: "moodleupdate.test"  # We override this for the test
 
   pre_tasks:
     - name: Import Moodle PHP Setup role to set the web server config
       import_role:
         name: ansible-role-moodle
         tasks_from: phpsql-setup
-        public: false
       tags: install
     - name: Set Moodle version to 3.8.1 to update it later
       set_fact:
@@ -23,19 +24,13 @@
     - role: geerlingguy.repo-remi
       when: ansible_os_family == 'RedHat'
     # Database install
-    - name: geerlingguy.postgresql
-      when: dbengine == "postgres"
     - name: geerlingguy.mysql
-      when: dbengine == "mysql"
     # Then apache
     - geerlingguy.apache
     - geerlingguy.php-versions
     - geerlingguy.php
     # Then PHP Database libraries
     - name: geerlingguy.php-mysql
-      when: dbengine == "mysql"
-    - name: geerlingguy.php-pgsql
-      when: dbengine == "postgres"
     # Other dependencies such as composer
     - name: geerlingguy.composer
     - name: geerlingguy.git
@@ -50,9 +45,9 @@
       register: moodle_state_v381
     - name: Check the version of moodle is the right one
       assert:
-      that:
-        - "moodle_state_v381.release  == '3.8.1 (Build: 20200113)'"
-        - "not moodle_state_v381.moodle_needs_upgrading|bool"
+        that:
+          - "moodle_state_v381.current_release  == '3.8.1 (Build: 20200113)'"
+          - "not moodle_state_v381.moodle_needs_upgrading|bool"
     - name: update_moodle
       include_role:
         name: ansible-role-moodle

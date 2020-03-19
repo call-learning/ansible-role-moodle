@@ -20,7 +20,6 @@
       import_role:
         name: ansible-role-moodle
         tasks_from: phpsql-setup
-      tags: install
     - debug:
         msg: "System {{ moodle_database }} "
 
@@ -28,10 +27,9 @@
     - name: ansible-role-moodle
       tags: only-vars
 
-
   tasks:
     - name: Check that all directories and files have been created
-      include_tasks: tools/check-exists.yml
+      include_tasks: ../default/tools/check-exists.yml
       loop: "{{ files_to_check }}"
 
     - name: Get Moodle current configuration
@@ -51,7 +49,7 @@
           - "moodle_state.current_release == '3.8.2 (Build: 20200309)'"
 
     - name: Get the site frontpage
-      action: uri url=http://moodle.test return_content=yes
+      action: uri url=http://moodlepg.test return_content=yes
       register: webpage
 
     - name: Check that the page contains

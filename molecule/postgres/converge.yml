@@ -15,21 +15,28 @@
       tags: install
     - debug:
         msg: "System {{ moodle_database }} "
+      # The Fedora 30+ container images have only C.UTF-8 installed
+    - name: Set database locale if using Fedora 30+ or RedHat 8+
+      set_fact:
+        postgresql_databases:
+          - name: "{{ moodle_database.dbname }}"
+            owner: "{{ moodle_database.dbuser }}"
+            lc_collate: 'C.UTF-8'
+            lc_ctype: 'C.UTF-8'
+      when:
+        - ( ansible_distribution == 'Fedora' and ansible_distribution_major_version >= '30') or
+          ( ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8')
   roles:
     - role: geerlingguy.repo-remi
       when: ansible_os_family == 'RedHat'
     # Database install
     - name: geerlingguy.postgresql
       when: dbengine == "postgres"
-    - name: geerlingguy.mysql
-      when: dbengine == "mysql"
     # Then apache
     - geerlingguy.apache
     - geerlingguy.php-versions
     - geerlingguy.php
     # Then PHP Database libraries
-    - name: geerlingguy.php-mysql
-      when: dbengine == "mysql"
     - name: geerlingguy.php-pgsql
       when: dbengine == "postgres"
     # Other dependencies such as composer

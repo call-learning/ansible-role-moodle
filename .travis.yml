@@ -15,8 +15,8 @@ install:
   - pip install molecule ansible-lint docker flake8 yamllint nose
 
 script:
-  # Run tests.
-  - molecule test
+  # Run tests  - default scenario then posgres and update scenarios
+  - molecule test --all
   - nosetests -library/test_check_moodle.py
 
 notifications:

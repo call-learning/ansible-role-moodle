@@ -3,8 +3,6 @@ php_enable_webserver: false
 php_version: '7.2'
 php_enable_php_fpm: true
 php_fpm_listen: "127.0.0.1:9000"
-mysql_python_package_debian: python3-mysqldb
-
 
 apache_mods_enabled:
   - expires.load
@@ -24,7 +22,7 @@ apache_vhosts:
 
 # Moodle database details
 moodle_database:
-  dbtype: "mariadb"
+  dbtype: "pgsql"
   dbhost: "localhost"
   dbname: "moodle"
   dbuser: "username"
@@ -33,20 +31,18 @@ moodle_database:
 
 # Moodle Version
 moodle_version: "v3.8.2"
+moodle_domain_name: "moodlepg.test"
 
-# Database details
-mysql_enablerepo: "remi"
-
-mysql_databases:
-  - name: "{{ moodle_database.dbname }}"
-    encoding: UTF8
-    collation: utf8_general_ci
-
-mysql_users:
+# As the playbook create the user first, we need to do that in this order
+postgresql_users:
   - name: "{{ moodle_database.dbuser }}"
-    host: "%"
     password: "{{ moodle_database.dbpass }}"
-    priv: "{{ moodle_database.dbname }}.*:ALL"
 
-dbengine: "mysql"
-# mysql_root_password_update: true
+postgresql_databases:
+  - name: "{{ moodle_database.dbname }}"
+    owner: "{{ moodle_database.dbuser }}"
+# Here we drop the collation info as it is an issue with CentOS/Redhat images for testing.
+# TODO: find a way to install them in CENTOS 8
+# https://github.com/geerlingguy/ansible-role-postgresql/blob/master/molecule/default/converge.yml
+
+dbengine: "postgres"

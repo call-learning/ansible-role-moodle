@@ -2,6 +2,13 @@
 # Here we assume that composer has been installed
 # See https://github.com/geerlingguy/ansible-role-composer for the role to install composer
 
+# This defines the usual path if not defined. We need to have an
+# absolute path here as Redhat/Centos don't look at /usr/local/bin for binaries
+- name: Define composer path to the default value if not defined
+  set_fact:
+    composer_path: "/usr/local/bin/composer"
+  when: composer_path is undefined
+
 - name: Check if composer is installed
   command: "{{ composer_path }} --version"
   register: composer_installed
