@@ -1,5 +1,6 @@
 ---
 
+# Usual tweaks and php manadatory packages for Moodle
 # We don't use any of these tasks in the role itself as
 # this is only a tool here to be used in other playbook like:
 # - import_role: call-learning.moodle
@@ -90,7 +91,6 @@
         - json
         - mbstring
         - opcache
-        - pgsql
         - readline
         - soap
         - xml
@@ -117,3 +117,8 @@
   set_fact:
     php_packages: "{{ php_packages }} + ['{{ php_prefix }}-pgsql']"
   when: dbengine == 'postgres'
+
+- name: Set php_package for MySQL
+  set_fact:
+    php_packages: "{{ php_packages }} + ['{{ php_prefix }}-mysql']"
+  when: dbengine == 'mysql'

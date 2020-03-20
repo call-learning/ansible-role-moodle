@@ -15,7 +15,7 @@
       tags: install
     - debug:
         msg: "System {{ moodle_database }} "
-      # The Fedora 30+ container images have only C.UTF-8 installed
+        # The Fedora 30+ container images have only C.UTF-8 installed
     - name: Set database locale if using Fedora 30+ or RedHat 8+
       set_fact:
         postgresql_databases:
