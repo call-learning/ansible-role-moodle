@@ -77,7 +77,7 @@
         php_prefix: php
     - name: Set Php package prefix for Debian like systems
       set_fact:
-        php_prefix: php7.2
+        php_prefix: "php{{ php_version }}"
       when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
     - name: Set all php packages names
       set_fact:
