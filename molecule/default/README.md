@@ -2,6 +2,8 @@
 
 This now uses Molecule. You need to install it and all dependencies to be able to 
 run the tests. 
+Images are now based upon prebuilt PHP/MySQL images so to speed up the test process.
+
 We use molecule 3.x version.
 
 ```bash

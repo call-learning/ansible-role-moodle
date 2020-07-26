@@ -5,7 +5,7 @@ driver:
   name: docker
 platforms:
   - name: instanceposgres
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1804}-ansible:latest"
+    image: "call-learning/docker-${MOLECULE_DISTRO:-ubuntu1804}-postgres-moodle-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro

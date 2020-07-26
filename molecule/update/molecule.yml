@@ -5,7 +5,7 @@ driver:
   name: docker
 platforms:
   - name: instanceupdate
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1804}-ansible:latest"
+    image: "call-learning/docker-${MOLECULE_DISTRO:-ubuntu1804}-mysql-moodle-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro

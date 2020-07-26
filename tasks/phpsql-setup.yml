@@ -1,6 +1,6 @@
 ---
 
-# Usual tweaks and php manadatory packages for Moodle
+# Usual tweaks and php mandatory packages for Moodle
 # We don't use any of these tasks in the role itself as
 # this is only a tool here to be used in other playbook like:
 # - import_role: call-learning.moodle

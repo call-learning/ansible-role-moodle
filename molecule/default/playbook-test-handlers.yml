@@ -3,9 +3,7 @@
 
   vars_files:
     - vars.yml
-
-  pre_tasks:
-    - include: setup.yml
+    - vars-db.yml
 
   roles:
     - name: geerlingguy.repo-remi

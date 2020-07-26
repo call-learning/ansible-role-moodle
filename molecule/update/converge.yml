@@ -6,6 +6,7 @@
 
   vars_files:
     - ../default/vars.yml
+    - ../default/vars-db.yml
   vars:
     moodle_domain_name: "moodleupdate.test"  # We override this for the test
 
@@ -21,19 +22,6 @@
     - debug:
         msg: "System {{ moodle_database }} "
   roles:
-    - role: geerlingguy.repo-remi
-      when: ansible_os_family == 'RedHat'
-    # Database install
-    - name: geerlingguy.mysql
-    # Then apache
-    - geerlingguy.apache
-    - geerlingguy.php-versions
-    - geerlingguy.php
-    # Then PHP Database libraries
-    - name: geerlingguy.php-mysql
-    # Other dependencies such as composer
-    - name: geerlingguy.composer
-    - name: geerlingguy.git
     # Finally the role under test
     - name: ansible-role-moodle
   post_tasks:

@@ -14,6 +14,7 @@
       - "{{ moodle_src_path }}/config.php"
   vars_files:
     - vars.yml
+    - vars-db.yml
 
   pre_tasks:
     - name: Import Moodle PHP Setup role to set the web server config

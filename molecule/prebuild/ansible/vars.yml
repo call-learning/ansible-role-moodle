@@ -21,6 +21,3 @@ apache_vhosts:
       <FilesMatch \.php$>
         SetHandler "proxy:fcgi://{{ php_fpm_listen }}"
       </FilesMatch>
-
-# Moodle Version
-moodle_version: "v3.8.2"
