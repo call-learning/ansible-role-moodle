@@ -7,11 +7,11 @@
   vars_files:
     - ../../../defaults/main.yml
     - vars.yml
-    - vars-postgresql.yml
+    - vars-mysql.yml
 
   pre_tasks:
     - name: Import Moodle PHP Setup role to set the web server config
-      import_tasks: ../../../tasks/phpsql-setup.yml
+      include_tasks: ../../../tasks/phpsql-setup.yml
       tags: install
   roles:
     - role: geerlingguy.repo-remi

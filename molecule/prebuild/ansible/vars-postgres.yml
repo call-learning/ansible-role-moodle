@@ -1,7 +1,7 @@
 ---
 # As the playbook create the user first, we need to do that in this order
 postgresql_users:
-  - name: "username}"
+  - name: "username"
     password: "password"
 
 postgresql_databases:

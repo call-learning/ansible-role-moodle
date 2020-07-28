@@ -10,4 +10,3 @@
 
   roles:
     - name: ansible-role-moodle
-

@@ -27,4 +27,11 @@ Variables
 Note
 ==
 
+The run command had to be modified to take into account:
+* Local docker build with ansible:
+    * https://www.packer.io/docs/provisioners/ansible.html#docker
+    * Remove the /bin/bash at the end so we run the docker systemd daemon for centos/debian
+* Add the link to /sys/fs/cgroup and --privileged
+* Packer will rebuild the image but will not copy the VOLUME and CMD info from docker so
+we need to add it again.
 

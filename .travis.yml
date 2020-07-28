@@ -6,9 +6,9 @@ env:
   global:
     - ROLE_NAME: moodle
   matrix:
-    - MOLECULE_DISTRO: centos8
-    - MOLECULE_DISTRO: ubuntu1804
-    - MOLECULE_DISTRO: debian10
+    - MOLECULE_DISTRO=centos MOLECULE_DISTRO_VERSION=8
+    - MOLECULE_DISTRO=ubuntu MOLECULE_DISTRO_VERSION=1804
+    - MOLECULE_DISTRO=debian MOLECULE_DISTRO_VERSION=10
 
 install:
   # Install test dependencies.

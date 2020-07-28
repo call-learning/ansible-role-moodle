@@ -5,8 +5,9 @@
   become: true
 
   vars_files:
+    - ../../../defaults/main.yml
     - vars.yml
-    - vars-postgresql.yml
+    - vars-postgres.yml
 
   pre_tasks:
     - name: Import Moodle PHP Setup role to set the web server config
