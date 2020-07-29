@@ -11,7 +11,8 @@
 
   pre_tasks:
     - name: Import Moodle PHP Setup role to set the web server config
-      import_tasks: ../../../tasks/phpsql-setup.yml
+      # Include here and not import as we need the variable values for the rest of the script
+      include_tasks: ../../../tasks/phpsql-setup.yml
       tags: install
     # The Fedora 30+ container images have only C.UTF-8 installed
     - name: Set database locale if using Fedora 30+ or RedHat 8+
