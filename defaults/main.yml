@@ -71,3 +71,12 @@ moosh_install_directory: "/srv/moosh"
 
 # Moodle cron periodicity in minutes
 moodle_cron_periodicity: "5"
+
+# Should we force update the source code ?
+moodle_force_source_update: false
+
+# Should we also setup Moosh command ?
+moodle_setup_moosh: false
+
+# Should we fetch the source ?
+moodle_fetch_source: true

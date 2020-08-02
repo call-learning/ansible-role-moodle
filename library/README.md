@@ -18,6 +18,13 @@ connect to existing database)
 
 The process can also fail if the PHP CLI command (`php`) does not work or the provided folder is not a moodle folder.
 
+# Implementation notes
+
+Here we use the combination of action module (to push the moodletool.php script first) followed
+by the usual Ansible module library.
+So check_moodle will first call the code in action_plugin/check_moodle.py and then the code in check_moodle.py.
+
+
 ## Testing 
 To test it you need to install nose
 
@@ -28,6 +35,10 @@ Then:
     cd library
     nosetests -v test_check_moodle.py
     
-You can also test it using a mini test playbook:
+Also you can directly test the script by doing:
 
-    ansible-playbook -i 'localhost,' tests/test-check-moodle.yml 
+    python library/check_moodle.py  < library/test-check_moodle_input.json 
+
+If you need to test the action module (that will call this same library module), and in the root folder of this role:
+
+    ANSIBLE_ACTION_PLUGINS=`pwd`/action_plugins ANSIBLE_LIBRARY=`pwd`/library /home/laurentd/.virtualenvs/ansible-role-moodle/bin/ansible -vvv localhost -m check_moodle -a "install_dir=~/websites/htdocs/moodlelatest"

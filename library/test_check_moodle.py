@@ -1,34 +1,7 @@
 import subprocess
 import sys
 
-from check_moodle import CheckMoodle
 from nose.tools import assert_true
-
-
-# Here we just Mock a couple of class so to test the overall behaviour
-class MockedSuprocess():
-
-    def __init__(self, responsevalue):
-        self.responsevalue = responsevalue
-
-    def _check_returns(self, *popenargs):
-        allargs = " ".join(*popenargs)
-        code, returninfo = self.responsevalue[allargs]
-        returninfo['cmd'] = allargs
-        if code == 'CallProcessError':
-            raise subprocess.CalledProcessError(**returninfo)
-        if sys.version_info[0] == 2:
-            return returninfo['output'].encode(encoding='UTF-8',
-                                               errors='strict')
-        else:
-            return returninfo['output']
-
-    def check_call(self, *popenargs):
-        return self._check_returns(*popenargs)
-
-    def check_output(self, *popenargs, **kwargs):
-        return self._check_returns(*popenargs)
-
 
 USUAL_ANSWERS = {
     'php -v': [

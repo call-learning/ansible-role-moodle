@@ -13,13 +13,15 @@
 
 - name: Setup Moosh
   import_tasks: setup-moosh.yml
+  when: moodle_setup_moosh | bool
 
 - name: Setup all Directories
   import_tasks: setup-dirs.yml
 
 - name: Fetch source
   import_tasks: commands/moodle-fetchsources.yml
+  when: moodle_fetch_source|bool
 
 - name: Run setup and configuration.
   import_tasks: setup-moodle.yml
-  when: moodle_run_config|bool
+  when: moodle_run_config|bool and moodle_fetch_source|bool

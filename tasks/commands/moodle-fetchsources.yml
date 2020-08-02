@@ -16,6 +16,7 @@
     key_file: "{{ moodle_git_key_file }}"
     recursive: true
     update: true
+    force: "{{ moodle_force_source_update }}"
   become: true
   become_user: "{{ moodle_webserver_user }}"  # Check out as www-data
 

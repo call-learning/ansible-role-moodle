@@ -7,12 +7,13 @@
 
 - name: Run installer
   command: >
-    php admin/cli/install_database.php --adminuser={{ moodle_site_admin.username }}
-    --adminpass={{ moodle_site_admin.password }}
-    --adminemail={{ moodle_site_admin.email }}
+    php admin/cli/install_database.php
+    --adminuser="{{ moodle_site_admin.username }}"
+    --adminpass="{{ moodle_site_admin.password }}"
+    --adminemail="{{ moodle_site_admin.email }}"
     --agree-license
-    --fullname={{ moodle_site_fullname }}
-    --shortname={{ moodle_site_shortname }}
+    --fullname="{{ moodle_site_fullname }}"
+    --shortname="{{ moodle_site_shortname }}"
   args:
     chdir: "{{ moodle_src_path }}"
   become: true
