@@ -9,10 +9,14 @@ def check_php_cli_installed(module):
     """ Check if PHP is installed.  Process will exit with an error message if
     fails (see fail_json).
     """
-    retvalue = {
-        'failed': False,
-    }
     (rc, returnvalue, returnerr) = module.run_command(["php", "-v"])
+    if rc != 0:
+        retvalue = {
+            'failed': True,
+            'msg': 'Could not run php cli tool',
+            'code': 'moodletoolgeneralerror'
+        }
+        module.fail_json(**retvalue)
 
 
 def run_moodle_tool(module, moodle_tool_path, install_dir,

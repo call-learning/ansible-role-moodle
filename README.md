@@ -71,5 +71,8 @@ More info in the README.md of the library folder.
 
 ## #TODO
 
-- Tag tasks so we can have a an install task (always run unless skipped) and some optional task such as 
-    change password, update, dump database, ...)  
+- Tags tasks 
+    -  Pure setup without running moodle install (just folders and source code)
+    -  Install with moodle install,
+    - ...  some optional task such as change password, update, dump database, ...
+      

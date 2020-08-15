@@ -21,13 +21,7 @@
     - name: Import Moodle PHP Setup role to set the web server config
       import_role:
         name: ansible-role-moodle
-        tasks_from: phpsql-setup
-    - debug:
-        msg: "System {{ moodle_database }} "
-
-  roles:
-    - name: ansible-role-moodle
-      tags: only-vars
+        tasks_from: configure-vars.yml
 
   tasks:
     - name: Check the state of current moodle
@@ -50,4 +44,4 @@
     - name: Check that the page contains
       assert:
         that:
-          - "'<h1>Moodle</h1>' in webpage.content"
+          - "'<h1>Moodle Test Site</h1>' in webpage.content"

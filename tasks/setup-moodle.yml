@@ -17,7 +17,7 @@
   become_user: "{{ moodle_webserver_user }}"
   register: moodle_state
 
-- name: install Moodle
+- name: Install Moodle
   include_tasks: commands/moodle-install.yml
   when: not moodle_state.moodle_is_installed|bool
 
@@ -33,7 +33,7 @@
   when: moodle_state.moodle_is_installed|bool
     and moodle_state.moodle_needs_upgrading|bool
 
-- name: setup cron
+- name: Setup cron
   cron:
     name: "Moodle Cron"
     minute: "{{ moodle_cron_periodicity }}"

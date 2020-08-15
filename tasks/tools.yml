@@ -1,7 +1,5 @@
 ---
 
-- import_tasks: setup-moosh.yml
-
 - name: Tools - do file dump
   import_tasks: commands/moodle-filedump.yml
   tags: ['never', 'task-filedump']
@@ -12,8 +10,10 @@
 
 - name: Tools - Retrieve the latest code on the given branch (including submodules)
   import_tasks: commands/moodle-fetchsources.yml
-  notify:
-    - upgrade moodle
+  tags: ['never', 'task-fetchsource', 'task-updatecode']
+
+- name: Tools - Update Moodle
+  import_tasks: commands/moodle-update.yml
   tags: ['never', 'task-updatecode']
 
 - name: Tools - Change admin password
@@ -21,9 +21,9 @@
   tags: ['never', 'task-updatepassword']
 
 - name: Tools - Bootstrap Search SOLR
-  include_tasks: commands/moodle-bootstrapsolr.yml
+  import_tasks: commands/moodle-bootstrapsolr.yml
   tags: ['never', 'task-bootstrapsolr']
 
 - name: Tools - Setup SOLR config in Moodle
-  include_tasks: commands/moodle-setupsolr.yml
+  import_tasks: commands/moodle-setupsolr.yml
   tags: ['never', 'setup-solr']

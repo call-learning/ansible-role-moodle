@@ -19,12 +19,10 @@
     - name: Set Moodle version to 3.8.1 to update it later
       set_fact:
         moodle_version: "v3.8.1"
-    - debug:
-        msg: "System {{ moodle_database }} "
   roles:
     # Finally the role under test
     - name: ansible-role-moodle
-  post_tasks:
+  tasks:
     - name: Check the state of current moodle
       check_moodle:
         install_dir: "{{ moodle_src_path }}"
@@ -36,12 +34,8 @@
         that:
           - "moodle_state_v381.current_release  == '3.8.1 (Build: 20200113)'"
           - "not moodle_state_v381.moodle_needs_upgrading|bool"
-    - name: update_moodle
+    - name: Update moodle to v3.8.2
       include_role:
         name: ansible-role-moodle
-        tasks_from: tools
-        apply:
-          tags:
-            - task-updatecode
       vars:
         moodle_version: "v3.8.2"

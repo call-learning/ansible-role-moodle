@@ -141,8 +141,8 @@ This will be an json object with the following values:
     'msg': [Text message if failed], // Optional
     'code': [Error code if failed],  // Optional
     'current_version': [Current Moodle version], // Optional
-    'moodle_is_installed': [True or false],
-    'moodle_needs_upgrading': [True or false],
+    'moodle_is_installed': [true or false],
+    'moodle_needs_upgrading': [true or false],
 }
 
 Other commands might return a different set of values, but failed, msg and code are
@@ -193,6 +193,7 @@ if (!isset($CFG) || empty($CFG->version)) {
             'failed' => false,
             'current_version' => $CFG->version,
             'current_release' => $CFG->release,
+            'moodle_is_installed' => true,
             'moodle_needs_upgrading' => $moodleneedsupgrade,
         ];
     }

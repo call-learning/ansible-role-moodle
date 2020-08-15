@@ -1,188 +1,57 @@
-import subprocess
-import sys
+from unittest.mock import Mock
 
 from nose.tools import assert_true
 
+from library.check_moodle import check_php_cli_installed, run_moodle_tool
+
 USUAL_ANSWERS = {
-    'php -v': [
-        'OK',
-        {
-            'returncode': 1,
-            'output':
-                'PHP 7.2.28-3+ubuntu16.04.1+deb.sury.org+1'
-        }
-    ],
-    'moosh -h': [
-        'OK',
-        {
-            'returncode': 1,
-            'output':
-                ''
-        },
-    ],
+    'installed php -v':
+        (0, 'PHP 7.2.28-3+ubuntu16.04.1+deb.sury.org+1', ''),
+    'non-installed php -v':
+        (127, '', 'bash: php : commande introuvable'),
+    'php /tmp/moodletool.php': (0,
+                                '{'
+                                '"failed": false,'
+                                '"msg": null,'
+                                '"code": null,'
+                                '"moodle_is_installed": true,'
+                                '"moodle_needs_upgrading": false,'
+                                '"current_version": "3.8.4",'
+                                '"current_release": "3.8"'
+                                '}', '')
 }
 
 
-def test_check_php_not_installed():
-    moodlecheck = CheckMoodle("/var/www/moodle/")
-    subprocessval = {'php -v': [
-        'CallProcessError',
-        {
-            'returncode': 255,
-            'output':
-                'PHP 7.2.28-3+ubuntu16.04.1+deb.sury.org+1'
-        }
-    ],
-    }
-    moodlecheck._subprocess = MockedSuprocess(subprocessval)
-    retvalue = moodlecheck.check()
-    expectedvalue = {
-        'failed': True,
-        'msg': "Requirements not present (phpcli): php -v (255) : "
-               "PHP 7.2.28-3+ubuntu16.04.1+deb.sury.org+1",
-        'code': 'phpclinotinstalled'
-    }
-    assert_true(
-        retvalue == expectedvalue
-    )
+def test_check_php_cli_installed_ok():
+    ansible_module = Mock()
+    ansible_module.run_command = \
+        Mock(return_value=USUAL_ANSWERS['installed php -v'])
+    check_php_cli_installed(ansible_module)
+    ansible_module.fail_json.assert_not_called()
 
 
-def test_check_wrong_moodle_path():
-    moodlecheck = CheckMoodle("/var/www/moodle/")
-    mooshinfoanswer = {'moosh info': [
-        'CallProcessError',
-        {
-            'returncode': 1,
-            'output':
-                'Could not find Moodle installation!'
-        }
-    ]
-    }
-    subprocessval = USUAL_ANSWERS.copy()
-    subprocessval.update(mooshinfoanswer)
-    moodlecheck._subprocess = MockedSuprocess(subprocessval)
-    retvalue = moodlecheck.check()
-    expectedvalue = {
-        'failed': True,
-        'msg': 'Invalid moodle source path',
-        'code': 'invalidsourcepath'
-    }
-    assert_true(
-        retvalue == expectedvalue
-    )
+def test_check_php_cli_installed_no_ok():
+    ansible_module = Mock()
+    ansible_module.run_command = \
+        Mock(return_value=USUAL_ANSWERS['non-installed php -v'])
+    check_php_cli_installed(ansible_module)
+    ansible_module.fail_json.assert_called()
 
 
-def test_check_moodle_moosh_fail():
-    moodlecheck = CheckMoodle("/var/www/moodle/")
-    moodlecheck._skipfoldercheck = True  # We skip folder check here
-
-    mooshinfoanswer = {
-        'moosh info': [
-            'CallProcessError',
-            {
-                'returncode': 1,
-                'output':
-                    'Error code: dbconnectionfailed'
-            }
-        ],
-    }
-    subprocessval = USUAL_ANSWERS.copy()
-    subprocessval.update(mooshinfoanswer)
-    moodlecheck._subprocess = MockedSuprocess(subprocessval)
-    retvalue = moodlecheck.check()
-    expectedvalue = {
-        'failed': True,
-        'msg': 'Error code: dbconnectionfailed',
-        'code': 'mooshgeneralerror',
-        'moodle_is_installed': False,
-        'moodle_needs_upgrading': False,
-        'current_version': None,
-        'current_release': None}
-    assert_true(
-        retvalue == expectedvalue
-    )
-
-
-def test_check_moodle_needs_upgrading():
-    moodlecheck = CheckMoodle("/var/www/moodle/")
-    moodlecheck._skipfoldercheck = True  # We skip folder check here
-
-    mooshinfoanswer = {
-        'moosh info': [
-            'Ok',
-            {
-                'returncode': 0,
-                'output':
-                    'Ok'
-            }
-        ],
-        'moosh config-get moodle version': [
-            'Ok',
-            {
-                'returncode': 0,
-                'output': '2019111800.07'
-            }
-        ],
-        'moosh config-get moodle release': [
-            'Ok',
-            {
-                'returncode': 0,
-                'output': '3.8+ (Build: 20200103)'
-            }
-        ],
-        'moosh check-needsupgrade': [
-            'Ok',
-            {
-                'returncode': 0,
-                'output': '1'
-            }
-        ],
-
-    }
-    subprocessval = USUAL_ANSWERS.copy()
-    subprocessval.update(mooshinfoanswer)
-    moodlecheck._subprocess = MockedSuprocess(subprocessval)
-    retvalue = moodlecheck.check()
+def test_check_moodle():
+    ansible_module = Mock()
+    ansible_module.run_command = \
+        Mock(return_value=USUAL_ANSWERS['php /tmp/moodletool.php'])
+    retvalue = run_moodle_tool(ansible_module, '/tmp/moodletool.php', '/tmp')
     expectedvalue = {
         'failed': False,
-        'msg': None,
-        'code': None,
+        "msg": None,
+        "code": None,
         'moodle_is_installed': True,
-        'moodle_needs_upgrading': True,
-        'current_version': '2019111800.07',
-        'current_release': '3.8+ (Build: 20200103)'
-    }
-    assert_true(
-        retvalue == expectedvalue
-    )
-
-
-def test_check_moodle_needs_installing():
-    moodlecheck = CheckMoodle("/var/www/moodle/")
-    moodlecheck._skipfoldercheck = True  # We skip folder check here
-
-    mooshinfoanswer = {
-        'moosh info': [
-            'CallProcessError',
-            {
-                'returncode': 1,
-                'output':
-                    'Error: No admin account was found'
-            },
-        ],
-    }
-    subprocessval = USUAL_ANSWERS.copy()
-    subprocessval.update(mooshinfoanswer)
-    moodlecheck._subprocess = MockedSuprocess(subprocessval)
-    retvalue = moodlecheck.check()
-    expectedvalue = {
-        'failed': False,
-        'msg': 'Error: No admin account was found',
-        'code': 'moodlenotinstalled',
-        'moodle_is_installed': False,
         'moodle_needs_upgrading': False,
-        'current_version': None,
-        'current_release': None}
+        'current_version': '3.8.4',
+        'current_release': '3.8',
+    }
     assert_true(
         retvalue == expectedvalue
     )
