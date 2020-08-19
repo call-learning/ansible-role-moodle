@@ -16,7 +16,7 @@ before_install:
 
 install:
   # Install test dependencies.
-  - pip install molecule yamllint ansible-lint flake8 nose docker
+  - pip install molecule===3.0.6 yamllint ansible-lint flake8 nose docker
 
 script:
   # Run tests  - default scenario then postgres and update scenarios
