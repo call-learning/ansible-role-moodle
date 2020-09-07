@@ -24,7 +24,3 @@
 - name: Run setup and configuration.
   import_tasks: setup-moodle.yml
   when: moodle_run_config|bool and moodle_fetch_source|bool
-
-- name: Run setup and configuration.
-  import_tasks: setup-moodle.yml
-  when: moodle_run_config|bool and moodle_fetch_source|bool
