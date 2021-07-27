@@ -101,11 +101,7 @@
         - ldap
         - solr
         - redis
-
-- name: Add APCU package for debian / Ubuntu
-  set_fact:
-    php_packages: "{{ php_packages }} + ['php-apcu']"
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+        - apcu
 
 # Need to add php-process on Redhat so we can use moodle moosh
 - name: Set php_packages (apcu + php-process) for PHP CentOS/Redhat from REMI package.
