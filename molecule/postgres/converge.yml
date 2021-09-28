@@ -8,4 +8,4 @@
     - ../default/vars.yml
     - vars-db.yml
   roles:
-    - name: ansible-role-moodle
+    - name: call-learning.moodle

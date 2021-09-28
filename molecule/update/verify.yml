@@ -20,7 +20,7 @@
   pre_tasks:
     - name: Import Moodle PHP Setup role to set the web server config
       import_role:
-        name: ansible-role-moodle
+        name: call-learning.moodle
         tasks_from: configure-vars.yml
 
   tasks:
