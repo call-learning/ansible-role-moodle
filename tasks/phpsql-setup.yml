@@ -20,14 +20,13 @@
 - name: Add specific packages for Debian
   apt:
     pkg:
-      - python-crontab
+      - python3-crontab
       - cron
-      - python-pymysql
+      - python3-pymysql
     state: present
   when: ansible_distribution == "Debian"
 
 # Redhat and Centos
-
 - name: Tweak Redhad/Centos package names
   block:
     - name: Set Mysql Packages For Redhat/Centos
@@ -70,7 +69,6 @@
 # ALL Distribution (note the difference in name from Debian and Ubuntu, version prefixing)
 - name: Set php_packages for all distributions
   block:
-    # We use PHP 7.2 for testing (see vars.yml and php-versions role)
     - name: Set php packages to an empty list and php_prefix
       set_fact:
         php_packages: []
@@ -101,6 +99,7 @@
         - ldap
         - solr
         - redis
+        - apcu
 
 # Need to add php-process on Redhat so we can use moodle moosh
 - name: Set php_packages (apcu + php-process) for PHP CentOS/Redhat from REMI package.
@@ -109,10 +108,10 @@
   when: ansible_os_family == "RedHat"
 
 # See note on APCU https://github.com/geerlingguy/ansible-role-php#apcu-related-variables
-- name: Set php_packages (apcu) for PHP CentOS/Redhat from REMI package.
+- name: Set php_packages (apcu) for PHP Ubuntu
   set_fact:
     php_packages: "{{ php_packages }} + ['php-apcu']"
-  when: ansible_os_family == 'Debian'
+  when: ansible_os_family == "Debian"
 
 - name: Set php_package for postgres
   set_fact:

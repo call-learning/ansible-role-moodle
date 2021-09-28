@@ -6,7 +6,7 @@ from library.check_moodle import check_php_cli_installed, run_moodle_tool
 
 USUAL_ANSWERS = {
     'installed php -v':
-        (0, 'PHP 7.2.28-3+ubuntu16.04.1+deb.sury.org+1', ''),
+        (0, 'PHP 7.4.24', ''),
     'non-installed php -v':
         (127, '', 'bash: php : commande introuvable'),
     'php /tmp/moodletool.php': (0,

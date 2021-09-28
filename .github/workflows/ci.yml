@@ -40,13 +40,14 @@ jobs:
     strategy:
       matrix:
         include:
-          - distro: centos8
+          - distro: centos
+            version: 8
             playbook: converge.yml
-          - distro: ubuntu2004
+          - distro: ubuntu
+            version: 1804
             playbook: converge.yml
-          - distro: ubuntu1804
-            playbook: converge.yml
-          - distro: debian11
+          - distro: debian
+            version: 10
             playbook: converge.yml
 
     steps:
@@ -69,4 +70,5 @@ jobs:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
+          MOLECULE_DISTRO_VERSION: ${{ matrix.version }}
           MOLECULE_PLAYBOOK: ${{ matrix.playbook }}
