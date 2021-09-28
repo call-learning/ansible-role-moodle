@@ -14,7 +14,7 @@
     version: "{{ moodle_version }}"
     depth: 1  # Only shallow cloning. Can be fixed if needed later to have the full history (git pull --unshallow)
     key_file: "{{ moodle_git_key_file }}"
-    accept_hostkey: yes
+    accept_hostkey: true
     recursive: true
     update: true
     force: "{{ moodle_force_source_update }}"

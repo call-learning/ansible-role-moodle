@@ -101,13 +101,18 @@
         - ldap
         - solr
         - redis
-        - apcu
 
 # Need to add php-process on Redhat so we can use moodle moosh
 - name: Set php_packages (apcu + php-process) for PHP CentOS/Redhat from REMI package.
   set_fact:
     php_packages: "{{ php_packages }} + ['php-pecl-apcu', 'php-process']"
   when: ansible_os_family == "RedHat"
+
+# See note on APCU https://github.com/geerlingguy/ansible-role-php#apcu-related-variables
+- name: Set php_packages (apcu) for PHP CentOS/Redhat from REMI package.
+  set_fact:
+    php_packages: "{{ php_packages }} + ['php-apcu']"
+  when: ansible_os_family == 'Debian'
 
 - name: Set php_package for postgres
   set_fact:

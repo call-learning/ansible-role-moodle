@@ -3,6 +3,7 @@ php_enable_webserver: false
 php_version: '7.2'
 php_enable_php_fpm: true
 php_fpm_listen: "127.0.0.1:9000"
+php_enable_apc: true
 mysql_python_package_debian: python3-mysqldb
 
 
