@@ -80,3 +80,6 @@ moodle_setup_moosh: false
 
 # Should we fetch the source ?
 moodle_fetch_source: true
+
+# PHP FPM: should we install all PHP FPM Database modules (mysql, postgres...)
+install_all_db_php_modules: false

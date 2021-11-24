@@ -14,7 +14,9 @@
 
 # Debian
 - name: Update apt cache.
-  apt: update_cache=yes cache_valid_time=86400
+  apt:
+    update_cache: true
+    cache_valid_time: 86400
   when: ansible_os_family == 'Debian'
 
 - name: Add specific packages for Debian
@@ -116,9 +118,9 @@
 - name: Set php_package for postgres
   set_fact:
     php_packages: "{{ php_packages }} + ['{{ php_prefix }}-pgsql']"
-  when: dbengine == 'postgres'
+  when: dbengine == 'postgres' or ( install_all_db_php_modules is defined and install_all_db_php_modules )
 
 - name: Set php_package for MySQL
   set_fact:
     php_packages: "{{ php_packages }} + ['{{ php_prefix }}-mysql']"
-  when: dbengine == 'mysql'
+  when: dbengine == 'mysql' or ( install_all_db_php_modules is defined and install_all_db_php_modules )

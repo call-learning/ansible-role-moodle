@@ -10,6 +10,10 @@
     - vars-postgres.yml
 
   pre_tasks:
+    - name: Fix potential issue with Debian 10 packages
+      shell: "apt-get update --allow-releaseinfo-change"
+      when: ansible_os_family == 'Debian' and ansible_distribution_major_version == '10'
+      become: true
     - name: Import Moodle PHP Setup role to set the web server config
       # Include here and not import as we need the variable values for the rest of the script
       include_tasks: ../../../tasks/phpsql-setup.yml
