@@ -5,7 +5,7 @@
   become: true
 
   vars_files:
-    - ../default/vars.yml
-    - vars-db.yml
+    - ../default/vars/vars.yml
+    - vars/vars-db.yml
   roles:
-    - name: call-learning.moodle
+    - name: call_learning.moodle

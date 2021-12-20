@@ -36,7 +36,8 @@
         "--extra-vars",
         "ansible_host={{user `ansible_host`}} ansible_connection={{user `ansible_connection`}}"
       ],
-      "galaxy_file": "./requirements.yml"
+      "galaxy_file": "./requirements.yml",
+      "galaxy_force_install": true
     }
   ],
   "post-processors": [

@@ -8,7 +8,7 @@ name: CI
 
 defaults:
   run:
-    working-directory: 'call-learning.moodle'
+    working-directory: 'call_learning.moodle'
 
 jobs:
   lint:
@@ -18,7 +18,7 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v2
         with:
-          path: 'call-learning.moodle'
+          path: 'call_learning.moodle'
 
       - name: Set up Python 3.
         uses: actions/setup-python@v2
@@ -46,15 +46,21 @@ jobs:
           - distro: ubuntu
             version: 1804
             playbook: converge.yml
+          - distro: ubuntu
+            version: 2004
+            playbook: converge.yml
           - distro: debian
             version: 10
+            playbook: converge.yml
+          - distro: debian
+            version: 11
             playbook: converge.yml
 
     steps:
       - name: Check out the codebase.
         uses: actions/checkout@v2
         with:
-          path: 'call-learning.moodle'
+          path: 'call_learning.moodle'
 
       - name: Set up Python 3.
         uses: actions/setup-python@v2

@@ -3,7 +3,8 @@
 - src: geerlingguy.apache
 - src: geerlingguy.apache-php-fpm
 - src: geerlingguy.postgresql
-- src: geerlingguy.mysql
+- name: geerlingguy.mysql
+  src: https://github.com/call-learning/ansible-role-mysql.git
 - src: geerlingguy.php
 - src: geerlingguy.php-versions
 - src: geerlingguy.php-pgsql

@@ -2,6 +2,8 @@
 dependencies: []
 
 galaxy_info:
+  role_name: moodle
+  namespace: call_learning
   author: laurentdavid
   description: Moodle CentOS/Debian/Ubuntu.
   company: "CALL Learning"

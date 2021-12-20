@@ -35,3 +35,10 @@ The run command had to be modified to take into account:
 * Packer will rebuild the image but will not copy the VOLUME and CMD info from docker so
 we need to add it again.
 
+Note on Apparmor
+==
+If your host is an ubuntu or debian, disable apparmor for mysql.
+
+            sudo apt-get install apparmor-profiles
+            sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
+            sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld

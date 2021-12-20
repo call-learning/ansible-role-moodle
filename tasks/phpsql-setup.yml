@@ -3,7 +3,7 @@
 # Usual tweaks and php mandatory packages for Moodle
 # We don't use any of these tasks in the role itself as
 # this is only a tool here to be used in other playbook like:
-# - import_role: call-learning.moodle
+# - import_role: call_learning.moodle
 #      tasks_from: phpsql-setup.yml
 #      tags: install
 
@@ -16,7 +16,6 @@
 - name: Update apt cache.
   apt:
     update_cache: true
-    cache_valid_time: 86400
   when: ansible_os_family == 'Debian'
 
 - name: Add specific packages for Debian

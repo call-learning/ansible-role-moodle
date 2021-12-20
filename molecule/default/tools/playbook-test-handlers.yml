@@ -6,7 +6,7 @@
     - vars-db.yml
 
   roles:
-    - role_under_test
+    - call_learning.moodle
 
   tasks:
     - name: Trigger installation
