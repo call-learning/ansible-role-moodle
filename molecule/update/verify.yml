@@ -14,8 +14,8 @@
       - "{{ moodle_src_path }}/config.php"
     moodle_domain_name: "moodleupdate.test"  # We override this for the test
   vars_files:
-    - ../default/vars.yml
-    - ../default/vars-db.yml
+    - ../default/vars/vars.yml
+    - ../default/vars/vars-db.yml
 
   pre_tasks:
     - name: Import Moodle PHP Setup role to set the web server config

@@ -6,7 +6,7 @@ DBFLAVORS=mysql postgres
 build:
 	for DBFLAVOR in $(DBFLAVORS); \
 	do \
-		packer build -var-file=./vars/centos8.vars.json -var="docker_image_dbflavor=$$DBFLAVOR" moodle-ami.json ; \
+		packer build -var-file=./vars/centos7.vars.json -var="docker_image_dbflavor=$$DBFLAVOR" moodle-ami.json ; \
 		packer build -var-file=./vars/ubuntu1804.vars.json -var="docker_image_dbflavor=$$DBFLAVOR"  moodle-ami.json ; \
 		packer build -var-file=./vars/debian10.vars.json -var="docker_image_dbflavor=$$DBFLAVOR"  moodle-ami.json ; \
 		packer build -var-file=./vars/debian11.vars.json -var="docker_image_dbflavor=$$DBFLAVOR"  moodle-ami.json ; \

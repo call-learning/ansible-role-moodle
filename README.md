@@ -1,7 +1,9 @@
 # Ansible Role: Moodle
 
+[![CI](https://github.com/call-learning/ansible-role-moodle/actions/workflows/ci.yml/badge.svg)](https://github.com/call-learning/ansible-role-moodle/actions/workflows/ci.yml)
+
 Installs Moodle (3.0+) on RedHat and Debian/Ubuntu servers.
-Tested with Ansible 2.5
+Tested with Ansible 5.0
 
 ## Requirements
 

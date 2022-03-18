@@ -13,7 +13,7 @@
       - "{{ moodle_sharedcachedir }}"
       - "{{ moodle_src_path }}/config.php"
   vars_files:
-    - ../default/vars.yml
+    - ../default/vars/vars.yml
     - vars-db.yml
 
   pre_tasks:

@@ -5,15 +5,15 @@
   become: true
 
   vars_files:
-    - ../default/vars.yml
-    - ../default/vars-db.yml
+    - ../default/vars/vars.yml
+    - ../default/vars/vars-db.yml
   vars:
     moodle_domain_name: "moodleupdate.test"  # We override this for the test
 
   pre_tasks:
     - name: Import Moodle PHP Setup role to set the web server config
       import_role:
-        name: calllearning.moodle
+        name: call_learning.moodle
         tasks_from: phpsql-setup
       tags: install
     - name: Set Moodle version to 3.8.1 to update it later
@@ -21,7 +21,7 @@
         moodle_version: "v3.8.1"
   roles:
     # Finally the role under test
-    - name: calllearning.moodle
+    - name: call_learning.moodle
   tasks:
     - name: Check the state of current moodle
       check_moodle:
@@ -36,6 +36,6 @@
           - "not moodle_state_v381.moodle_needs_upgrading|bool"
     - name: Update moodle to v3.8.2
       include_role:
-        name: calllearning.moodle
+        name: call_learning.moodle
       vars:
         moodle_version: "v3.8.2"
