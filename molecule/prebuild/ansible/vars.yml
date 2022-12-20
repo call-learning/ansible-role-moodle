@@ -7,11 +7,11 @@ mysql_python_package_debian: python3-mysqldb
 
 
 apache_mods_enabled:
-  - expires.load
-  - ssl.load
-  - rewrite.load
-  - proxy.load
-  - proxy_fcgi.load
+  - expires
+  - ssl
+  - rewrite
+  - proxy
+  - proxy_fcgi
 apache_remove_default_vhost: true
 apache_vhosts:
   - servername: "{{ moodle_domain_name }}"

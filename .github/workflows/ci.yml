@@ -43,19 +43,15 @@ jobs:
           - distro: centos
             version: 7
             playbook: converge.yml
-          - distro: ubuntu
-            version: 1804
-            playbook: converge.yml
           - distro: debian
             version: 10
             playbook: converge.yml
           - distro: debian
             version: 11
             playbook: converge.yml
-#          - distro: ubuntu
-#            version: 2004
-#            playbook: converge.yml
-# For now we cannot build a proper 2004 image
+          - distro: ubuntu
+            version: 2004
+            playbook: converge.yml
     steps:
       - name: Check out the codebase.
         uses: actions/checkout@v2

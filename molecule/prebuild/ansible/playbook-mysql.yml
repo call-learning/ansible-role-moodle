@@ -12,10 +12,11 @@
   pre_tasks:
     - name: Run the equivalent of "apt-get update"
       apt:
-        update_cache: yes
+        update_cache: true
     - name: Fix potential issue with Debian 10 packages
       shell: "apt-get update --allow-releaseinfo-change"
-      when: ansible_os_family == 'Debian' and ansible_distribution_major_version == '10'
+      when: ansible_os_family == 'Debian'
+        and ansible_distribution_major_version == '10'
       become: true
     - name: Import Moodle PHP Setup role to set the web server config
       include_tasks: ../../../tasks/phpsql-setup.yml
@@ -24,7 +25,13 @@
     - role: geerlingguy.repo-remi
       when: ansible_os_family == 'RedHat'
     # Database install
+    # https://github.com/geerlingguy/ansible-role-mysql/issues/422
     - name: geerlingguy.mysql
+      vars:
+        mysql_enabled_on_startup: false
+      when: ansible_distribution == "Ubuntu" and ansible_distribution_major_version == "20"
+    - name: geerlingguy.mysql
+      when: ansible_distribution != "Ubuntu" and ansible_distribution_major_version <> "20"
     # Then apache
     - geerlingguy.apache
     - geerlingguy.php-versions
@@ -34,3 +41,26 @@
     # Other dependencies such as composer
     - name: geerlingguy.composer
     - name: geerlingguy.git
+  post_tasks:
+    # https://github.com/geerlingguy/ansible-role-mysql/issues/422
+    - name: Finish install with app armor disabled for Ubuntu 2004 and later
+      block:
+        - name: Install apparmor profiles
+          apt:
+            name: apparmor-profiles
+            state: present
+        - name: Disable app armor
+          ansible.builtin.file:
+            src: /etc/apparmor.d/usr.sbin.mysqld
+            dest: /etc/apparmor.d/disable/usr.sbin.mysqld
+            owner: root
+            group: root
+            state: link
+        - name: Reload config
+          ansible.builtin.command: apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
+          become: true
+        - name: Rerun the full geerlingguy.mysql role
+          include_role:
+            name: geerlingguy.mysql
+      when: ansible_distribution == "Ubuntu"
+            and ansible_distribution_major_version == "20"

@@ -12,7 +12,7 @@
   pre_tasks:
     - name: Run the equivalent of "apt-get update"
       apt:
-        update_cache: yes
+        update_cache: true
     - name: Fix potential issue with Debian 10 packages
       shell: "apt-get update --allow-releaseinfo-change"
       when: ansible_os_family == 'Debian' and ansible_distribution_major_version == '10'

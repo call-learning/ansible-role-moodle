@@ -7,7 +7,6 @@
     mode: 0644
     owner: "{{ moodle_webserver_user }}"
     group: "{{ moodle_webserver_group }}"
-    backup: true  # Take a backup just in case
 
 # This is using our custom module to check moodle state
 - name: Check the state of current moodle

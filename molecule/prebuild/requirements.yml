@@ -3,7 +3,7 @@
 - src: geerlingguy.apache
 - src: geerlingguy.apache-php-fpm
 - src: geerlingguy.postgresql
-- name: geerlingguy.mysql
+- src: geerlingguy.mysql
 - src: geerlingguy.php
 - src: geerlingguy.php-versions
 - src: geerlingguy.php-pgsql

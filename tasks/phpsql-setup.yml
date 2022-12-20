@@ -70,50 +70,45 @@
 # ALL Distribution (note the difference in name from Debian and Ubuntu, version prefixing)
 - name: Set php_packages for all distributions
   block:
-    - name: Set php packages to an empty list and php_prefix
-      set_fact:
-        php_packages: []
-        php_prefix: php
     - name: Set Php package prefix for Debian like systems
       set_fact:
         php_prefix: "php{{ php_version }}"
       when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
     - name: Set all php packages names
       set_fact:
-        php_packages: "{{ php_packages }} + [ '{{ php_prefix }}-{{ item }}' ]"
-      loop:
-        - cli
-        - common
-        - curl
-        - gd
-        - intl
-        - json
-        - mbstring
-        - opcache
-        - readline
-        - soap
-        - xml
-        - xmlrpc
-        - zip
-        - fpm
-        - cli
-        - ldap
-        - solr
-        - redis
-        - apcu
+        php_packages:
+          - "{{ php_prefix }}-cli"
+          - "{{ php_prefix }}-common"
+          - "{{ php_prefix }}-curl"
+          - "{{ php_prefix }}-gd"
+          - "{{ php_prefix }}-intl"
+          - "{{ php_prefix }}-json"
+          - "{{ php_prefix }}-mbstring"
+          - "{{ php_prefix }}-opcache"
+          - "{{ php_prefix }}-readline"
+          - "{{ php_prefix }}-soap"
+          - "{{ php_prefix }}-xml"
+          - "{{ php_prefix }}-xmlrpc"
+          - "{{ php_prefix }}-zip"
+          - "{{ php_prefix }}-fpm"
+          - "{{ php_prefix }}-cli"
+          - "{{ php_prefix }}-ldap"
+          - "{{ php_prefix }}-solr"
+          - "{{ php_prefix }}-redis"
+          - "{{ php_prefix }}-apcu"
 
 # Need to add php-process on Redhat so we can use moodle moosh
 - name: Set php_packages (apcu + php-process) for PHP CentOS/Redhat from REMI package.
   set_fact:
-    php_packages: "{{ php_packages }} + ['php-pecl-apcu', 'php-process']"
+    php_packages: "{{ php_packages + ['php-pecl-apcu', 'php-process'] }}"
   when: ansible_os_family == "RedHat"
 
 - name: Set php_package for postgres
   set_fact:
-    php_packages: "{{ php_packages }} + ['{{ php_prefix }}-pgsql']"
+    php_packages: "{{ php_packages + [ (php_prefix + '-pgsql') ] }}"
   when: dbengine == 'postgres' or ( install_all_db_php_modules is defined and install_all_db_php_modules )
 
 - name: Set php_package for MySQL
   set_fact:
-    php_packages: "{{ php_packages }} + ['{{ php_prefix }}-mysql']"
+    php_packages: "{{ php_packages + [ (php_prefix + '-mysql') ] }}"
   when: dbengine == 'mysql' or ( install_all_db_php_modules is defined and install_all_db_php_modules )
