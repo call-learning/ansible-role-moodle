@@ -1,0 +1,55 @@
+---
+name: "Build specific molecule test image"
+
+'on':
+  workflow_call:
+    inputs:
+      target:
+        description: 'Image target such as rockylinux9 debian12 ubuntu2204'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build_molecule_images:
+    name: Build a single molecule image
+    if: github.repository == 'call-learning/ansible-role-moodle'
+    runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_OWNER: ${{ secrets.DOCKERHUB_OWNER }}
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v3
+        with:
+          path: 'call_learning.moodle'
+      - name: Set up Python 3.
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Install test dependencies.
+        run: pip install ansible docker
+      - name: Setup `packer`
+        uses: hashicorp/setup-packer@main
+        id: setup
+        with:
+          version: "latest"
+      - name: Install GNU make
+        run: sudo apt install make
+       # https://github.com/marketplace/actions/the-docker-cli
+      - name: Build image
+        run: |
+          cd $GITHUB_WORKSPACE/call_learning.moodle/molecule-images
+          make ${{ inputs.target-name }}
+      # https://github.com/docker/login-action#docker-hub
+      - name: Login to Docker Hub
+        if: ${{ env.DOCKERHUB_OWNER != '' }}
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push image
+        run: |
+          cd molecule-image
+          make push

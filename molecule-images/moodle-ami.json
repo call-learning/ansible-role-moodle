@@ -1,7 +1,7 @@
 {
   "variables": {
     "full_image_version": "{{  user `docker_image_type` }}{{  user `docker_image_version` }}",
-    "ansible_host": "default",
+    "ansible_host": "packer_builder",
     "ansible_connection": "docker"
   },
   "builders": [
