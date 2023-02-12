@@ -1,0 +1,29 @@
+---
+
+- name: Prebuild Image - Postgres
+  hosts: all
+  become: true
+
+  vars_files:
+    - ../../defaults/main.yml
+    - vars.yml
+    - vars-postgres.yml
+
+  pre_tasks:
+    - name: Run the equivalent of "apt-get update"
+      apt:
+        update_cache: true
+      when: ansible_os_family == 'Debian'
+    # The Fedora 30+ container images have only C.UTF-8 installed
+    - name: Set database locale if using Fedora 30+ or RedHat 8+
+      set_fact:
+        postgresql_databases:
+          - name: "{{ moodle_database.dbname }}"
+            owner: "{{ moodle_database.dbuser }}"
+            lc_collate: 'C.UTF-8'
+            lc_ctype: 'C.UTF-8'
+  roles:
+    # Database install
+    - name: geerlingguy.postgresql
+    # And Git
+    - name: geerlingguy.git

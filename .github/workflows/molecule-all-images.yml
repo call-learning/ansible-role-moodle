@@ -1,0 +1,22 @@
+---
+name: "Build Molecule Images every month"
+
+'on':
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0  1 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.repository == 'call-learning/ansible-role-moodle'
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ['rockylinux9', 'debian12', 'ubuntu2204']
+    steps:
+      - uses: ./.github/workflows/molecule-image.yml
+        with:
+          target-name: ${{ matrix.target }}

@@ -1,33 +1,25 @@
 ---
 dependency:
   name: galaxy
+  options:
+    role-file: molecule-requirements.yml
 driver:
   name: docker
 platforms:
   - name: instanceposgres
-    image: "calllearning/${MOLECULE_DISTRO:-ubuntu}-postgres-moodle-ansible:${MOLECULE_DISTRO_VERSION:-1804}"
-    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    image: "calllearning/${MOLECULE_DISTRO:-ubuntu}-postgres-moodle-ansible:${MOLECULE_DISTRO_VERSION:-2204}"
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
     privileged: true
     pre_build_image: true
-    etc_hosts: "{'moodlepg.test':  '127.0.0.1'}"
+    etc_hosts: "{'moodle.test':  '127.0.0.1'}"
 provisioner:
   name: ansible
   log: true
   playbooks:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
-scenario:
-  name: postgres
-  test_sequence:  # Remove idempotence and side effect tests to make build a bit faster
-    - dependency
-    - cleanup
-    - destroy
-    - create
-    - prepare
-    - converge
-    - verify
-    - cleanup
-    - destroy
+    verify: ../default/verify.yml
 verifier:
   name: ansible
