@@ -1,7 +1,7 @@
 ---
 # Moodle database details
 moodle_database:
-  dbtype: "mariadb"
+  dbtype: "mysqli"
   dbhost: "localhost"
   dbname: "moodle"
   dbuser: "username"
@@ -23,4 +23,3 @@ mysql_users:
     priv: "{{ moodle_database.dbname }}.*:ALL"
 
 dbengine: "mysql"
-# mysql_root_password_update: true
