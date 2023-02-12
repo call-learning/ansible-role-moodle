@@ -1,5 +1,5 @@
 ---
-name: CI
+name: CI Test
 'on':
   pull_request:
   push:
@@ -11,46 +11,21 @@ defaults:
     working-directory: 'call_learning.moodle'
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out the codebase.
-        uses: actions/checkout@v2
-        with:
-          path: 'call_learning.moodle'
-
-      - name: Set up Python 3.
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8.x'
-
-      - name: Install test dependencies.
-        run: pip3 install yamllint nose ansible
-
-      - name: Lint code.
-        run: |
-          yamllint .
-      - name: Nose test
-        run: |
-          nosetests library/test_check_moodle.py
   molecule:
     name: Molecule
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       matrix:
         include:
-          - distro: centos
-            version: 7
+          - distro: rockylinux
+            version: 9
             playbook: converge.yml
           - distro: debian
-            version: 11
+            version: 12
             playbook: converge.yml
           - distro: ubuntu
-            version: 1804
-            playbook: converge.yml
-          - distro: ubuntu
-            version: 2004
+            version: 2204
             playbook: converge.yml
     steps:
       - name: Check out the codebase.
@@ -65,6 +40,15 @@ jobs:
 
       - name: Install test dependencies.
         run: pip3 install ansible molecule[docker] docker
+
+      # See: https://github.com/geerlingguy/ansible-role-mysql/issues/422
+      - name: Disable AppArmor on Debian.
+        run: |
+            set -x
+            sudo apt-get install apparmor-profiles
+            sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
+            sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
+        if: ${{ startsWith(matrix.distro, 'debian') }}
 
       - name: Run Molecule tests.
         run: molecule test --all

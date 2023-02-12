@@ -21,7 +21,6 @@
       import_role:
         name: call_learning.moodle
         tasks_from: configure-vars.yml
-
   tasks:
     - name: Check that all directories and files have been created
       include_tasks: tools/check-exists.yml
@@ -41,7 +40,7 @@
     - name: Check that Moodle has the right version
       assert:
         that:
-          - "moodle_state.current_release == '3.8.2 (Build: 20200309)'"
+          - moodle_state.current_release == moodle_target_release
 
     - name: Get the site frontpage
       action: uri url=http://moodle.test return_content=yes
@@ -50,4 +49,4 @@
     - name: Check that the page contains
       assert:
         that:
-          - "'<h1>Moodle Test Site</h1>' in webpage.content"
+          - "'<title>Moodle Test Site</title>' in webpage.content"

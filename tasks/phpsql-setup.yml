@@ -46,7 +46,7 @@
 
 - name: Add specific packages for Redhat/Centos
   yum:
-    name: crontabs
+    name: cronie
     state: present
   when: ansible_os_family == 'RedHat'
 
@@ -59,9 +59,19 @@
 - name: Install dependencies.
   package: name={{ item }}
   with_items:
-    - curl
     - unzip
     - sendmail
+
+- name: Install curl for all systems
+  package: name=curl
+  when: ansible_os_family != "RedHat"
+
+- name: Install curl via DNF
+  ansible.builtin.dnf:
+    name: curl
+    state: present
+    allowerasing: true
+  when: ansible_os_family == "RedHat"
 
 #
 # PHP Packages
@@ -70,9 +80,16 @@
 # ALL Distribution (note the difference in name from Debian and Ubuntu, version prefixing)
 - name: Set php_packages for all distributions
   block:
+    - name: Set Php Major version variable
+      set_fact:
+        php_major_version: "{{ php_version.split('.')[0] }}"
+    - name: Set Php package prefix for all systems
+      set_fact:
+        php_prefix: "php"
     - name: Set Php package prefix for Debian like systems
       set_fact:
         php_prefix: "php{{ php_version }}"
+        php_major_version: "{{ php_version.split('.')[0] }}"
       when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
     - name: Set all php packages names
       set_fact:
@@ -82,7 +99,6 @@
           - "{{ php_prefix }}-curl"
           - "{{ php_prefix }}-gd"
           - "{{ php_prefix }}-intl"
-          - "{{ php_prefix }}-json"
           - "{{ php_prefix }}-mbstring"
           - "{{ php_prefix }}-opcache"
           - "{{ php_prefix }}-readline"
@@ -96,6 +112,16 @@
           - "{{ php_prefix }}-solr"
           - "{{ php_prefix }}-redis"
           - "{{ php_prefix }}-apcu"
+# ALL Distribution (note the difference in name from Debian and Ubuntu, version prefixing)
+- name: Set php_packages depending on PHP version
+  set_fact:
+    php_packages: "{{ php_packages + [ (php_prefix + '-json') ] }}"
+  when: php_major_version != "8"
+
+- name: Set php_packages depending on PHP version 8
+  set_fact:
+    php_packages: "{{ php_packages + [ (php_prefix + '-exif') ] }}"
+  when: php_major_version == "8"
 
 # Need to add php-process on Redhat so we can use moodle moosh
 - name: Set php_packages (apcu + php-process) for PHP CentOS/Redhat from REMI package.

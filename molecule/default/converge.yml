@@ -1,12 +1,39 @@
 ---
-
 - name: Converge
   hosts: all
   become: true
-
   vars_files:
     - vars/vars.yml
     - vars/vars-db.yml
-
+  pre_tasks:
+    - name: Import Moodle PHP Setup role to set the web server config
+      import_role:
+        name: call_learning.moodle
+        tasks_from: phpsql-setup
+      tags: install
+    - name: Set driver as mariadb for Debian or RockyLinux
+      set_fact:
+        moodle_database:
+          dbtype: "mariadb"
+          dbhost: "localhost"
+          dbname: "moodle"
+          dbuser: "username"
+          dbpass: "password"
+          dbprefix: "mdl_"
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Rocky'
   roles:
+    - name: geerlingguy.repo-remi
+      when: ansible_os_family == "RedHat"
+    # Apache
+    - name: geerlingguy.apache
+    # PHP
+    - name: geerlingguy.php-versions
+    - name: geerlingguy.php
+    # Then PHP Database libraries
+    - name: geerlingguy.php-mysql
+    # PHP FPM
+    - name: geerlingguy.apache-php-fpm
+    # Other dependencies such as composer
+    - name: geerlingguy.composer
+    # Finally the role under test
     - name: call_learning.moodle

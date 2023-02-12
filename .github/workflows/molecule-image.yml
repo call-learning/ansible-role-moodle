@@ -1,0 +1,55 @@
+---
+name: "Build specific molecule image"
+
+'on':
+  workflow_call:
+    inputs:
+      target-name:
+        description: 'Image target such as rockylinux9 debian12 ubuntu2204'
+        required: true
+        type: string
+env:
+  REPOSITORY: ansible-role-moodle
+
+permissions:
+  contents: read
+
+jobs:
+  build_molecule_images:
+    name: Build a single molecule image
+    if: github.repository == 'call-learning/ansible-role-moodle'
+    runs-on: ubuntu-latest
+    env:
+      DOCKERHUB_OWNER: ${{ secrets.DOCKERHUB_OWNER }}
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v2
+        with:
+          path: 'call_learning.moodle'
+      - name: Set up Python 3.
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8.x'
+      - name: Install test dependencies.
+        run: pip3 install ansible molecule[docker] docker
+      - name: Install packer
+        run: |
+          wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt update
+          sudo apt install packer
+      - name: Build image
+        run: |
+          cd molecule-image
+          make ${{ inputs.target-name }}
+      # https://github.com/docker/login-action#docker-hub
+      - name: Login to Docker Hub
+        if: ${{ env.DOCKERHUB_OWNER != '' }}
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Push image
+        run: |
+          cd molecule-image
+          make push

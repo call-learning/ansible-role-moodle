@@ -6,7 +6,7 @@ moodle_webserver_user: "{{ (ansible_os_family == \"RedHat\") | ternary('apache',
 moodle_webserver_group: "{{ (ansible_os_family == \"RedHat\") | ternary('apache','www-data') }}"
 
 # The core version you want to use (e.g. 3.2.1, 2.8.4).
-moodle_version: "MOODLE_39_STABLE"  # Tag or branch name
+moodle_version: "MOODLE_41_STABLE"  # Tag or branch name
 moodle_git_url: "https://github.com/moodle/moodle"
 moodle_git_key_file: ""
 

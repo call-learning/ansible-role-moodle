@@ -1,7 +1,5 @@
 ---
 # Database details
-mysql_enablerepo: "remi"
-
 mysql_databases:
   - name: "moodle"
     encoding: utf8mb4

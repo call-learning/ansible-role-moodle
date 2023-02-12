@@ -1,6 +1,6 @@
 {
   "docker_image_type": "debian",
-  "docker_image_version": "11",
+  "docker_image_version": "12",
   "changes_volumes": "\"/sys/fs/cgroup\"",
   "changes_cmd": "/lib/systemd/systemd"
 }

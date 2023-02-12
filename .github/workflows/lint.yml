@@ -1,0 +1,36 @@
+---
+name: Lint
+'on':
+  pull_request:
+  push:
+  schedule:
+    - cron: "0 4 * * 4"
+
+defaults:
+  run:
+    working-directory: 'call_learning.moodle'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v2
+        with:
+          path: 'call_learning.moodle'
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8.x'
+
+      - name: Install test dependencies.
+        run: pip3 install yamllint nose ansible
+
+      - name: Lint code.
+        run: |
+          yamllint .
+      - name: Nose test
+        run: |
+          nosetests library/test_check_moodle.py

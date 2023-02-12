@@ -1,0 +1,19 @@
+---
+name: "Build Molecule test images every month"
+
+'on':
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0  1 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        target: ['rockylinux9', 'debian12', 'ubuntu2204']
+    uses: ./.github/workflows/molecule-image.yml
+    with:
+      target: ${{ matrix.target }}

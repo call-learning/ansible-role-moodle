@@ -1,18 +1,19 @@
 ---
 php_enable_webserver: false
-php_version: '7.4'
+php_version: '8.0'
 php_enable_php_fpm: true
 php_fpm_listen: "127.0.0.1:9000"
 php_enable_apc: true
+php_max_input_vars: "5000"
+
 mysql_python_package_debian: python3-mysqldb
 
-
 apache_mods_enabled:
-  - expires.load
-  - ssl.load
-  - rewrite.load
-  - proxy.load
-  - proxy_fcgi.load
+  - expires
+  - ssl
+  - rewrite
+  - proxy
+  - proxy_fcgi
 apache_remove_default_vhost: true
 apache_vhosts:
   - servername: "{{ moodle_domain_name }}"
@@ -23,5 +24,11 @@ apache_vhosts:
         SetHandler "proxy:fcgi://{{ php_fpm_listen }}"
       </FilesMatch>
 
+# Make sure that the rockylinux9 repo remi works
+# See https://github.com/geerlingguy/ansible-role-repo-remi/pull/30/commits/ff750e8fa4eb65849a0459d157810f47bb1ba330
+remi_repo_gpg_key_url: "https://rpms.remirepo.net/RPM-GPG-KEY-remi2021"
+
 # Moodle Version
-moodle_version: "v3.8.2"
+moodle_version: "v4.1.4"
+moodle_domain_name: "moodle.test"
+moodle_target_release: "4.1.4 (Build: 20230612)"
