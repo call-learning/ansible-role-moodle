@@ -1,0 +1,5 @@
+docker_image_type = "ubuntu"
+docker_image_version = "2204"
+changes_volumes = "\"/sys/fs/cgroup\", \"/tmp\", \"/run\""
+changes_cmd = "/lib/systemd/systemd"
+
