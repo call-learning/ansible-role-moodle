@@ -14,9 +14,10 @@ ALL_TARGETS=rockylinux9 debian12 ubuntu2204
 builds: $(ALL_TARGETS)
 
 $(ALL_TARGETS):
+	packer init . ; \
 	for DBFLAVOR in $(DBFLAVORS); \
 	do \
-		packer build -var-file=./vars/$@.vars.json -var="docker_image_dbflavor=$$DBFLAVOR" moodle-ami.json ; \
+		packer build -var-file=./vars/$@.vars.hcl -var="docker_image_dbflavor=$$DBFLAVOR" moodle-ami.pkr.hcl ; \
 	done
 
 push:
