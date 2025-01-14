@@ -3,12 +3,12 @@
 [![CI Test](https://github.com/call-learning/ansible-role-moodle/actions/workflows/molecule.yml/badge.svg)](https://github.com/call-learning/ansible-role-moodle/actions/workflows/molecule.yml)
 [![Lint](https://github.com/call-learning/ansible-role-moodle/actions/workflows/lint.yml/badge.svg)](https://github.com/call-learning/ansible-role-moodle/actions/workflows/lint.yml)
 
-Installs Moodle (4.1+) on RedHat and Debian/Ubuntu servers.
-Tested with Ansible 6.0
+Installs Moodle (4.3+) on RedHat and Debian/Ubuntu servers.
+Tested with Ansible 8.0
 
 ## Requirements
 
-Needs to be a recent LTS release of Ubuntu or REL which have PHP 8.0+, Apache 2.4 and 
+Needs to be a recent LTS release of Ubuntu or REL which have PHP 8.1+, Apache 2.4 and 
 Postgres or Mysql installed.
  
 
@@ -52,9 +52,7 @@ We are now using github action to run the tests at each commit (you can find the
 - molecule.yml will run each scenario in turn and check if the ansible playbook is valid
 
 Note: as installing Postgres and Mysql takes a while from the original [Jeff Geerling image](https://github.com/geerlingguy/docker-ubuntu2004-ansible)
-we have a process of prebuilding those images using [packer](https://www.packer.io/) each month. This
-process is done in the foler molecule-images that can be safely ignored if you are just looking for information about 
-the role itself.
+we have a process of prebuilding those images using [packer](https://www.packer.io/) each month. 
  
 - Once the docker has been launch you can rerun the playbook by running:
 ```bash
@@ -66,12 +64,8 @@ To test specific playbook such as the check_moodle.py part:
  
 ```bash
     container_id=xxxxyyy
-    docker exec $container_id env TERM=xterm env ANSIBLE_FORCE_COLOR=1 ansible-playbook -i 'localhost,' -M /etc/ansible/roles/role_under_test/library /etc/ansible/roles/role_under_test/tests/test-check-moodle.yml
+    docker exec $container_id env TERM=xterm env ANSIBLE_FORCE_COLOR=1 ansible-playbook -i 'localhost,' -M /etc/ansible/roles/role_under_test/XXX /etc/ansible/roles/role_under_test/tests/YYY
 ```
-
-### Library testing
-There is a small module that checks if moodle is installed/configured in the library folder.
-More info in the README.md of the library folder.
 
 ## #TODO
 

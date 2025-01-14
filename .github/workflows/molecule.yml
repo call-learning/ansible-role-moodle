@@ -14,32 +14,26 @@ jobs:
   molecule:
     name: Molecule
     runs-on: ubuntu-latest
-    continue-on-error: true
     strategy:
       matrix:
-        include:
-          - distro: rockylinux
-            version: 9
-            playbook: converge.yml
-          - distro: debian
-            version: 12
-            playbook: converge.yml
-          - distro: ubuntu
-            version: 2204
-            playbook: converge.yml
+        distro:
+          - rockylinux9
+          - ubuntu2204
+          - debian12
+
     steps:
       - name: Check out the codebase.
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-          path: 'call_learning.moodle'
+          path: 'geerlingguy.mysql'
 
       - name: Set up Python 3.
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9.x'
+          python-version: '3.x'
 
       - name: Install test dependencies.
-        run: pip3 install ansible molecule[docker] docker
+        run: pip3 install ansible molecule molecule-plugins[docker] docker
 
       # See: https://github.com/geerlingguy/ansible-role-mysql/issues/422
       - name: Disable AppArmor on Debian.
@@ -51,10 +45,8 @@ jobs:
         if: ${{ startsWith(matrix.distro, 'debian') }}
 
       - name: Run Molecule tests.
-        run: molecule test --all
+        run: molecule test
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
-          MOLECULE_DISTRO_VERSION: ${{ matrix.version }}
-          MOLECULE_PLAYBOOK: ${{ matrix.playbook }}

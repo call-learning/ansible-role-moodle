@@ -1,11 +1,9 @@
 ---
-
 - name: Converge
   hosts: all
   become: true
-
   vars_files:
-    - ../default/vars/vars.yml
+    - vars/vars.yml
     - vars/vars-db.yml
   pre_tasks:
     - name: Import Moodle PHP Setup role to set the web server config
@@ -14,10 +12,13 @@
         tasks_from: phpsql-setup
       tags: install
   roles:
-    - name: geerlingguy.repo-remi
-      when: ansible_os_family == "RedHat"
+    - role: geerlingguy.repo-remi
+      when: ansible_os_family == 'RedHat'
+    - name: geerlingguy.git
     # Apache
     - name: geerlingguy.apache
+    # Mysql
+    - name: geerlingguy.pgsql
     # PHP
     - name: geerlingguy.php-versions
     - name: geerlingguy.php
@@ -29,3 +30,15 @@
     - name: geerlingguy.composer
     # Finally the role under test
     - name: call_learning.moodle
+  post_tasks:
+       - name: Restart apache
+         service:
+           name: httpd
+           state: restarted
+           enabled: yes
+       - name: Restart php{{ php_version }}-fpm
+         service:
+           name: php{ {php_version }}-fpm
+           state: restarted
+           enabled: yes
+

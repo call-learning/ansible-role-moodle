@@ -39,3 +39,11 @@
     job: "php {{ moodle_src_path }}/admin/cli/cron.php 2>&1"
     user: "{{ moodle_webserver_user }}"
   when: moodle_cron_periodicity is defined and moodle_cron_periodicity != 0
+
+- name: Setup adhoc task
+  cron:
+    name: "Moodle Adhoc Task"
+    minute: "{{ moodle_cron_periodicity }}"
+    job: "php {{ moodle_src_path }}/adhoc_task.php --execute --keep-alive {{ 59 * moodle_cron_periodicity}} 2>&1"
+    user: "{{ moodle_webserver_user }}"
+  when: moodle_cron_periodicity is defined and moodle_cron_periodicity != 0

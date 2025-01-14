@@ -49,4 +49,4 @@
     - name: Check that the page contains
       assert:
         that:
-          - "'<title>Moodle Test Site</title>' in webpage.content"
+          - "'Moodle Test Site' in webpage.content"

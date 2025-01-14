@@ -27,32 +27,15 @@
     state: present
   when: ansible_distribution == "Debian"
 
-# Redhat and Centos
-- name: Tweak Redhad/Centos package names
-  block:
-    - name: Set Mysql Packages For Redhat/Centos
-      set_fact:
-        mysql_packages:
-          - mariadb
-          - mariadb-server
-          - mysql-libs
-          - python2-PyMySQL
-          - python3-PyMySQL
-          - perl-DBD-MySQL
-        mysql_daemon: mariadb
-        mysql_log_error: /var/log/mariadb/mariadb.log
-        mysql_syslog_tag: mariadb
-  when: ansible_os_family == 'RedHat'
-
 - name: Add specific packages for Redhat/Centos
   yum:
     name: cronie
     state: present
   when: ansible_os_family == 'RedHat'
 
-- name: Define postgresql_version to 9.3 for RedHat/CentOS.
+- name: Define postgresql_version to 13 for RedHat/CentOS.
   set_fact:
-    postgresql_version: "9.3"
+    postgresql_version: "13"
   when: ansible_os_family == "RedHat"
 
 # ALL Systems
@@ -73,6 +56,16 @@
     allowerasing: true
   when: ansible_os_family == "RedHat"
 
+- name: Add MariaDB repository
+  copy:
+    dest: /etc/yum.repos.d/MariaDB.repo
+    content: |
+      [mariadb]
+      name = MariaDB
+      baseurl = http://yum.mariadb.org/10.6/rhel9-amd64
+      gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+      gpgcheck=1
+  when: ansible_os_family == "RedHat"
 #
 # PHP Packages
 #
@@ -105,13 +98,14 @@
           - "{{ php_prefix }}-soap"
           - "{{ php_prefix }}-xml"
           - "{{ php_prefix }}-xmlrpc"
-          - "{{ php_prefix }}-zip"
           - "{{ php_prefix }}-fpm"
           - "{{ php_prefix }}-cli"
           - "{{ php_prefix }}-ldap"
           - "{{ php_prefix }}-solr"
           - "{{ php_prefix }}-redis"
           - "{{ php_prefix }}-apcu"
+          - "{{ php_prefix }}-zip"
+          - "{{ php_prefix }}-intl"
 # ALL Distribution (note the difference in name from Debian and Ubuntu, version prefixing)
 - name: Set php_packages depending on PHP version
   set_fact:
@@ -123,10 +117,9 @@
     php_packages: "{{ php_packages + [ (php_prefix + '-exif') ] }}"
   when: php_major_version == "8"
 
-# Need to add php-process on Redhat so we can use moodle moosh
-- name: Set php_packages (apcu + php-process) for PHP CentOS/Redhat from REMI package.
+- name: Set php_packages (apcu) for PHP Rocky.
   set_fact:
-    php_packages: "{{ php_packages + ['php-pecl-apcu', 'php-process'] }}"
+    php_packages: "{{ php_packages + ['php-pecl-apcu'] }}"
   when: ansible_os_family == "RedHat"
 
 - name: Set php_package for postgres
