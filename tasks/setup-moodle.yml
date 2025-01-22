@@ -32,6 +32,14 @@
   when: moodle_state.moodle_is_installed|bool
     and moodle_state.moodle_needs_upgrading|bool
 
+- name: Ensure cron is installed (Ubuntu 24.04 or later only)
+  apt:
+    name: cron
+    state: present
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_version is version('24.04', '>=')
+
 - name: Setup cron
   cron:
     name: "Moodle Cron"

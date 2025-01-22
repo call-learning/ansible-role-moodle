@@ -33,7 +33,7 @@
   post_tasks:
        - name: Restart php{{ php_version }}-fpm
          service:
-           name: php{ {php_version }}-fpm
+           name: php{{php_version }}-fpm
            state: restarted
            enabled: yes
 
