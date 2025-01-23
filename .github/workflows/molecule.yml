@@ -25,7 +25,7 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v4
         with:
-          path: 'geerlingguy.mysql'
+          path: 'call_learning.moodle'
 
       - name: Set up Python 3.
         uses: actions/setup-python@v5
