@@ -26,8 +26,6 @@
     - name: geerlingguy.php-pgsql
     # PHP FPM
     - name: geerlingguy.apache-php-fpm
-    # Other dependencies such as composer
-    - name: geerlingguy.composer
     # Finally the role under test
     - name: call_learning.moodle
   post_tasks:
