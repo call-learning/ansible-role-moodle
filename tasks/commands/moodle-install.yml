@@ -1,0 +1,66 @@
+---
+
+- name: Moodle- Check before if installation directory exists
+  stat:
+    path: "{{ moodle_src_path }}/config.php"
+  register: moodle_config_source
+
+- name: S'assurer que la base de données existe
+  community.mysql.mysql_db:
+        name: "{{ moodle_database.dbname }}"
+        state: present
+        encoding: utf8mb4
+        collation: utf8mb4_unicode_ci
+  when: "{{ dbengine == 'mysql' }}"
+
+- name: Créer l'utilisateur de la base de données
+  community.mysql.mysql_user:
+     name: "{{ moodle_database.dbuser }}"
+     password: "{{ moodle_database.dbpass }}"
+     host: "{{ moodle_database.dbhost }}"
+     state: present
+  when: "{{ dbengine == 'mysql' }}"
+
+- name: Attribuer tous les privilèges à l'utilisateur sur la base de données
+  community.mysql.mysql_user:
+      name: "{{ moodle_database.dbuser }}"
+      password: "{{ moodle_database.dbpass }}"
+      host: "{{ moodle_database.dbhost }}"
+      priv: "{{ moodle_database.dbname }}.*:ALL"
+      state: present
+  when: "{{ dbengine == 'mysql' }}"
+
+- name: Vérifier si des tables existent dans la base de données
+  community.mysql.mysql_query:
+     login_user: "{{ moodle_database.dbuser }}"
+     login_password: "{{ moodle_database.dbpass }}"
+     query: "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = '{{ moodle_database.dbname }}';"
+  register: table_count_result
+
+- name: Vérifier si des tables existent
+  debug:
+    msg: "Des tables existent dans la base de données '{{ moodle_database.dbname }}'. Nombre de tables : {{ table_count_result.query_result[0][0].table_count }}"
+  when: table_count_result.query_result[0][0].table_count | int > 0
+
+- name: Afficher un message si aucune table n'existe
+  debug:
+    msg: "La base de données '{{ moodle_database.dbname }}' ne contient aucune table."
+  when: table_count_result.query_result[0][0].table_count | int == 0
+
+- name: Run installer if not yet done
+  command: >
+    php admin/cli/install_database.php
+    --adminuser="{{ moodle_site_admin.username }}"
+    --adminpass="{{ moodle_site_admin.password }}"
+    --adminemail="{{ moodle_site_admin.email }}"
+    --agree-license
+    --fullname="{{ moodle_site_fullname }}"
+    --shortname="{{ moodle_site_shortname }}"
+  args:
+    chdir: "{{ moodle_src_path }}"
+  become: true
+  become_user: "{{ moodle_webserver_user }}"
+  register: installerresult
+  changed_when: installerresult.rc != 0
+  when: 
+    - table_count_result.query_result[0][0].table_count | int == 0 

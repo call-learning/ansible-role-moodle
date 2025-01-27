@@ -1,0 +1,111 @@
+---
+
+- name: Create config if it does not exist
+  template:
+    src: templates/config.php.j2
+    dest: "{{ moodle_src_path }}/config.php"
+    mode: 0644
+    owner: "{{ moodle_webserver_user }}"
+    group: "{{ moodle_webserver_group }}"
+      
+# This is using our custom module to check moodle state
+#- name: Check the state of current moodle
+#  check_moodle:
+#    install_dir: "{{ moodle_src_path }}"
+#  become: true
+#  become_user: "{{ moodle_webserver_user }}"
+#  register: moodle_state
+#  ignore_errors: true
+
+- name: Deploy moodletool.php to the Moodle CLI directory
+  copy:
+   src: "moodletool.php" # "{{ moodletool_local_path }}"
+   dest: "{{ moodle_src_path }}/admin/cli/moodletool.php"
+   owner: www-data
+   group: www-data
+   mode: '0755'
+
+- name: Check Moodle status
+  block:
+    - name: Run Moodle status check
+      moodle_status:
+        install_dir: "{{ moodle_src_path }}"
+      register: moodle_status
+      failed_when: false  # Continue même en cas d'erreur
+
+    - name: Analyze Moodle status for database errors
+      set_fact:
+        db_connection_error: "{{ 'Error: Database connection failed' in moodle_status.debug.moodletool_stdout | default('') }}"
+
+    - name: Show Moodle status
+      debug:
+        msg: >
+          Moodle Status:
+          Installed: {{ moodle_status.moodle_is_installed | default('Unknown') }}
+          Needs Upgrading: {{ moodle_status.moodle_needs_upgrading | default('Unknown') }}
+          Version: {{ moodle_status.current_version | default('N/A') }}
+          Release: {{ moodle_status.current_release | default('N/A') }}
+            # when: not db_connection_error
+
+    - name: Handle database connection errors
+      debug:
+        msg: >
+          Database connection error detected.
+          CLI Output: {{ moodle_status.debug.moodletool_stdout | default('N/A') }}
+          CLI Error Output: {{ moodle_status.debug.moodletool_stderr | default('N/A') }}
+      when: db_connection_error
+
+  rescue:
+    - name: Handle failures in Moodle status check
+      debug:
+        msg: >
+          An unexpected error occurred during the Moodle status check.
+          Please investigate further.
+          CLI Output: {{ moodle_status.debug.moodletool_stdout | default('N/A') }}
+          CLI Error Output: {{ moodle_status.debug.moodletool_stderr | default('N/A') }}
+
+  always:
+    - name: Finalize Moodle status check
+      debug:
+        msg: "Moodle status check completed."
+
+- name: Install Moodle
+  include_tasks: commands/moodle-install.yml
+  when: not (moodle_status.moodle_is_installed | default(false) | bool)
+
+# Change password to make sure we are always in sync
+# Watch out this will work on Moodle where the reset_password.php command accepts arguments
+# Added the cache purge as sometimes old users are cached when db is replaced
+- name: Change admin password
+  import_tasks: commands/moodle-resetpw.yml
+  when: moodle_status.moodle_is_installed | default(false) |bool
+
+- name: Launch update (if needed)
+  import_tasks: commands/moodle-update.yml
+  when: 
+    - moodle_status.moodle_is_installed| default(false) |bool
+    - moodle_status.moodle_needs_upgrading| default(false) |bool
+
+- name: Ensure cron is installed (Ubuntu 24.04 or later only)
+  apt:
+    name: cron
+    state: present
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_version is version('24.04', '>=')
+
+- name: Setup cron
+  cron:
+    name: "Moodle Cron"
+    minute: "{{ moodle_cron_periodicity }}"
+    job: "php {{ moodle_src_path }}/admin/cli/cron.php 2>&1"
+    user: "{{ moodle_webserver_user }}"
+  when: moodle_cron_periodicity is defined and moodle_cron_periodicity != 0
+
+- name: Setup adhoc task
+  cron:
+    name: "Moodle Adhoc Task"
+    minute: "{{ moodle_cron_periodicity }}"
+    job: "php {{ moodle_src_path }}/adhoc_task.php --execute --keep-alive {{ 59 * moodle_cron_periodicity}} 2>&1"
+    user: "{{ moodle_webserver_user }}"
+  when: moodle_cron_periodicity is defined and moodle_cron_periodicity != 0

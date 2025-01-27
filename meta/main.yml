@@ -1,0 +1,27 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: moodle
+  namespace: call_learning
+  author: laurentdavid
+  description: Moodle CentOS/Debian/Ubuntu.
+  company: "CALL Learning"
+  license: "license (BSD, MIT)"
+  min_ansible_version: 11.0
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+    - name: Ubuntu
+      versions:
+        - jammy
+    - name: RockyLinux
+      versions:
+        - 9
+  galaxy_tags:
+    - development
+    - web
+    - php
+    - language
+    - moodle
