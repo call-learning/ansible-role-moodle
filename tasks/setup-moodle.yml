@@ -8,15 +8,6 @@
     owner: "{{ moodle_webserver_user }}"
     group: "{{ moodle_webserver_group }}"
       
-# This is using our custom module to check moodle state
-#- name: Check the state of current moodle
-#  check_moodle:
-#    install_dir: "{{ moodle_src_path }}"
-#  become: true
-#  become_user: "{{ moodle_webserver_user }}"
-#  register: moodle_state
-#  ignore_errors: true
-
 - name: Deploy moodletool.php to the Moodle CLI directory
   copy:
    src: "moodletool.php" # "{{ moodletool_local_path }}"
@@ -31,7 +22,7 @@
       moodle_status:
         install_dir: "{{ moodle_src_path }}"
       register: moodle_status
-      failed_when: false  # Continue même en cas d'erreur
+      failed_when: false
 
     - name: Analyze Moodle status for database errors
       set_fact:
@@ -45,7 +36,6 @@
           Needs Upgrading: {{ moodle_status.moodle_needs_upgrading | default('Unknown') }}
           Version: {{ moodle_status.current_version | default('N/A') }}
           Release: {{ moodle_status.current_release | default('N/A') }}
-            # when: not db_connection_error
 
     - name: Handle database connection errors
       debug:
