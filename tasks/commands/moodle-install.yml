@@ -5,7 +5,7 @@
     path: "{{ moodle_src_path }}/config.php"
   register: moodle_config_source
 
-- name: S'assurer que la base de données existe
+- name: Make sure the database exists
   community.mysql.mysql_db:
         name: "{{ moodle_database.dbname }}"
         state: present
@@ -13,7 +13,7 @@
         collation: utf8mb4_unicode_ci
   when: "{{ dbengine == 'mysql' }}"
 
-- name: Créer l'utilisateur de la base de données
+- name: Create the database user
   community.mysql.mysql_user:
      name: "{{ moodle_database.dbuser }}"
      password: "{{ moodle_database.dbpass }}"
@@ -21,7 +21,7 @@
      state: present
   when: "{{ dbengine == 'mysql' }}"
 
-- name: Attribuer tous les privilèges à l'utilisateur sur la base de données
+- name: Grant all privileges to the user on the database
   community.mysql.mysql_user:
       name: "{{ moodle_database.dbuser }}"
       password: "{{ moodle_database.dbpass }}"
@@ -30,19 +30,19 @@
       state: present
   when: "{{ dbengine == 'mysql' }}"
 
-- name: Vérifier si des tables existent dans la base de données
+- name: Check if any tables exist in the database
   community.mysql.mysql_query:
      login_user: "{{ moodle_database.dbuser }}"
      login_password: "{{ moodle_database.dbpass }}"
      query: "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = '{{ moodle_database.dbname }}';"
   register: table_count_result
 
-- name: Vérifier si des tables existent
+- name: Check if any tables exist with an informational message displaying the number of tables
   debug:
     msg: "Des tables existent dans la base de données '{{ moodle_database.dbname }}'. Nombre de tables : {{ table_count_result.query_result[0][0].table_count }}"
   when: table_count_result.query_result[0][0].table_count | int > 0
 
-- name: Afficher un message si aucune table n'existe
+- name: Display a message if no tables exist
   debug:
     msg: "La base de données '{{ moodle_database.dbname }}' ne contient aucune table."
   when: table_count_result.query_result[0][0].table_count | int == 0
