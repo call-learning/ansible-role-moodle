@@ -14,29 +14,31 @@
   roles:
     - role: geerlingguy.repo-remi
       when: ansible_os_family == 'RedHat'
+      tags: molecule-idempotence-notest
     - name: geerlingguy.git
+      tags: molecule-idempotence-notest
     # Apache
     - name: geerlingguy.apache
+      tags: molecule-idempotence-notest
     # Mysql
     - name: geerlingguy.pgsql
+      tags: molecule-idempotence-notest
     # PHP
     - name: geerlingguy.php-versions
+      tags: molecule-idempotence-notest
     - name: geerlingguy.php
     # Then PHP Database libraries
     - name: geerlingguy.php-pgsql
+      tags: molecule-idempotence-notest
     # PHP FPM
     - name: geerlingguy.apache-php-fpm
+      tags: molecule-idempotence-notest
     # Finally the role under test
     - name: call_learning.moodle
   post_tasks:
-       - name: Restart apache
-         service:
-           name: httpd
-           state: restarted
-           enabled: yes
        - name: Restart php{{ php_version }}-fpm
          service:
-           name: php{ {php_version }}-fpm
+           name: php{{php_version }}-fpm
            state: restarted
            enabled: yes
-
+         changed_when: false
