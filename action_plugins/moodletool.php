@@ -20,7 +20,6 @@ try {
         $returnvalue = [
             'failed' => true,
             'msg' => 'Config file not found',
-            'moodle_is_installed' => false,
         ];
         echo json_encode($returnvalue);
         exit(0);
@@ -41,11 +40,20 @@ try {
 
     echo json_encode($returnvalue);
 } catch (Exception $e) {
-    $returnvalue = [
-        'failed' => true,
-        'msg' => $e->getMessage(),
-        'moodle_is_installed' => false,
-    ];
+    if (in_array(get_class($e), ['dml_connection_exception', 'dml_read_exception', 'dml_exception'])) {
+        $returnvalue = [
+            'failed' => false,
+            'moodle_is_installed' => false,
+            'moodle_needs_upgrading' => false,
+            'current_version' => 'Unknown',
+            'current_release' => 'Unknown',
+        ];
+    } else {
+        $returnvalue = [
+            'failed' => true,
+            'msg' => $e->getMessage(),
+        ];
+    }
     echo json_encode($returnvalue);
 }
 exit(0);
