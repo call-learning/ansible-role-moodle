@@ -7,79 +7,66 @@ import json
 from ansible.errors import AnsibleError
 from ansible.plugins.action import ActionBase
 
+TOOL_FILENAME = 'moodletool.php'
+
+
 class ActionModule(ActionBase):
+
     def run(self, tmp=None, task_vars=None):
-        # Get the install_dir parameter
-        install_dir = self._task.args.get('install_dir')
-        if not install_dir:
-            return {'failed': True, 'msg': "The 'install_dir' parameter is required."}
+        """Handles transferring and executing the tool directly."""
+        if task_vars is None:
+            task_vars = {}
 
-        # Check first if there is a config.php file in the install_dir
-        config_file = f"{install_dir}/config.php"
-        # Check if the file exists on the remote host
-        stat_result = self._execute_module(
-            module_name='stat',
-            module_args={'path': config_file},
-            task_vars=task_vars or {}
-        )
-        # If the file doesn't exist, return a failure message
-        if not stat_result.get('stat', {}).get('exists', False):
-            return {
-                'changed': False,
-                'moodle_is_installed': False,
-                'moodle_needs_upgrading': False,
-                'msg': f"Could not find the config.php file at {config_file} on the remote host."
+        self.TRANSFERS_FILES = True  # Ensure temp folder is created
+        super().run(tmp, task_vars)
+
+        remote_tmp = self._connection._shell.tmpdir
+        remote_path = os.path.join(remote_tmp, TOOL_FILENAME)
+
+        action_plugin_dir = os.path.dirname(__file__)
+        tool_path = os.path.join(action_plugin_dir, TOOL_FILENAME)
+
+        install_dir = self._task.args.get('install_dir', '')
+        if os.path.isfile(tool_path):
+            # Upload tool to remote machine
+            self._transfer_file(tool_path, remote_path)
+
+            # Fix permissions
+            self._fixup_perms2([remote_path, remote_tmp])
+
+            # Run the PHP script directly
+            # Run the PHP script directly with install_dir argument
+            result = self._low_level_execute_command(
+                f"php {remote_path} {install_dir}",
+                sudoable=True)
+
+            # Cleanup the tool after execution
+            self._low_level_execute_command(f"rm -f {remote_path}")
+            self.cleanup(True)
+
+            # Return the result from execution
+            # Try to parse the output as JSON
+            moodle_output = result.get('stdout', '').strip()
+            return_value = {
+                "changed": False,
+                "failed": False,
             }
-
-        is_installed = False
-        needs_upgrading = False
-        # Command to run the Moodle CLI config script
-        command = f"php {install_dir}/admin/cli/upgrade.php --is-pending"
-        # Run the command on the remote host
-        rc, stdout, stderr = self._connection.exec_command(command)
-
-        # Check for command failure
-        if rc == 2:
-            needs_upgrading = True
-        if rc == 1 and "Config table does not contain the version" in stderr.decode('utf-8'):
-            return {
-                'changed': False,
-                'moodle_is_installed': is_installed,
-                'moodle_needs_upgrading': needs_upgrading,
-                'msg': "Moodle is not installed"
-            }
-        is_installed = True
-        # Command to run the Moodle CLI config script
-        command = f"php {install_dir}/admin/cli/cfg.php --json"
-
-        # Run the command on the remote host
-        rc, stdout, stderr = self._connection.exec_command(command)
-
-        # Check for command failure
-        if rc != 0:
-            return {
-                'failed': True,
-                'msg': f"Command failed with error: {stderr.strip()}",
-                'rc': rc
-            }
-
-        # Attempt to parse the JSON output
-        try:
-            parsed_output = json.loads(stdout.strip())
-        except json.JSONDecodeError as e:
-            return {
-                'failed': True,
-                'msg': f"Failed to parse JSON output: {str(e)}",
-                'raw_output': stdout.strip()
-            }
-        current_version = parsed_output.get('version')
-        current_release = parsed_output.get('release')
-        # Return the parsed JSON output
-        return {
-            'changed': False,
-            'config': parsed_output,
-            'moodle_is_installed': is_installed,
-            'moodle_needs_upgrading': needs_upgrading,
-            'current_version': current_version,
-            'current_release': current_release,
-        }
+            try:
+                parsed_output = json.loads(moodle_output)
+                if parsed_output.get('failed'):
+                    return_value.update({
+                        "failed": True,
+                        "msg": parsed_output.get('msg')
+                    })
+                else:
+                    return_value.update(parsed_output)
+            except json.JSONDecodeError:
+                return_value.update({
+                    "failed": True,
+                    "msg": "Failed to parse the output from the Moodle tool: " + moodle_output
+                })
+            return return_value
+        else:
+            raise AnsibleError(
+                f"Failed to find the tool ({TOOL_FILENAME}) at path ({tool_path})"
+            )

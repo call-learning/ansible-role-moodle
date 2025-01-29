@@ -8,29 +8,53 @@
     owner: "{{ moodle_webserver_user }}"
     group: "{{ moodle_webserver_group }}"
 
-# This is using our custom module to check moodle state
-- name: Check the state of current moodle
-  check_moodle:
-    install_dir: "{{ moodle_src_path }}"
-  become: true
-  become_user: "{{ moodle_webserver_user }}"
-  register: moodle_state
+- name: Check Moodle status
+  block:
+    - name: Run Moodle status check
+      check_moodle:
+        install_dir: "{{ moodle_src_path }}"
+      become: true
+      become_user: "{{ moodle_webserver_user }}"
+      register: moodle_state
+      failed_when: moodle_state.failed | default(false)
+
+    - name: Show Moodle status
+      debug:
+        msg: >
+          Moodle Status:
+          Installed: {{ moodle_state.moodle_is_installed | default('Unknown') }}
+          Needs Upgrading: {{ moodle_state.moodle_needs_upgrading | default('Unknown') }}
+          Version: {{ moodle_state.current_version | default('N/A') }}
+          Release: {{ moodle_state.current_release | default('N/A') }}
+  rescue:
+    - name: Handle failures in Moodle status check
+      debug:
+        msg: >
+          An unexpected error occurred during the Moodle status check.
+          Please investigate further.
+          CLI Output: {{ moodle_state.msg | default('N/A') }}
+          CLI Error Output: {{ moodle_state.msg | default('N/A') }}
+    - set_fact:
+        moodle_check_failed: true
+  always:
+    - name: Finalize Moodle status check
+      debug:
+        msg: "Moodle status check completed."
 
 - name: Install Moodle
   include_tasks: commands/moodle-install.yml
-  when: not moodle_state.moodle_is_installed|bool
+  when: not (moodle_state.moodle_is_installed | default(false) | bool) and not (moodle_check_failed | default(false) | bool)
 
-# Change password to make sure we are always in sync
-# Watch out this will work on Moodle where the reset_password.php command accepts arguments
-# Added the cache purge as sometimes old users are cached when db is replaced
 - name: Change admin password
   import_tasks: commands/moodle-resetpw.yml
-  when: moodle_state.moodle_is_installed|bool
+  when: moodle_state.moodle_is_installed | default(false) | bool and not (moodle_check_failed | default(false) | bool)
 
 - name: Launch update (if needed)
   import_tasks: commands/moodle-update.yml
-  when: moodle_state.moodle_is_installed|bool
-    and moodle_state.moodle_needs_upgrading|bool
+  when:
+    - moodle_state.moodle_is_installed | default(false) | bool
+    - moodle_state.moodle_needs_upgrading | default(false) | bool
+    - not (moodle_check_failed | default(false) | bool)
 
 - name: Ensure cron is installed (Ubuntu 24.04 or later only)
   apt:

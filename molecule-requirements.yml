@@ -10,3 +10,4 @@
 - src: geerlingguy.php-pgsql
 - src: geerlingguy.php-mysql
 - src: geerlingguy.git
+- src: geerlingguy.repo-remi
