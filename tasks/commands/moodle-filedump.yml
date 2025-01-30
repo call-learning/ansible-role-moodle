@@ -1,25 +1,50 @@
 ---
-
-- name: Set default dump folder if not set
-  set_fact:
-    local_dump_folder: "dumps"
-  when: not local_dump_folder is defined
-
-- name: Create local installation directory if it does not exist
-  file:
-    path: "{{ local_dump_folder }}"
+- name: Create a temporary directory for backup
+  ansible.builtin.tempfile:
     state: directory
+    suffix: moodle_backup
+  register: temp_backup_dir
   delegate_to: localhost
 
-- name: Sync data folder locally
-  synchronize:
-    mode: pull
-    src: "{{ moodle_sitedata }}"
-    dest: "{{ local_dump_folder }}/moodledata-{{ inventory_hostname }}.{{ ansible_date_time.epoch }}"
+- name: Perform Moodle data backup
+  block:
+    - name: Sync Moodle data folder locally
+      synchronize:
+        mode: pull
+        src: "{{ moodle_dataroot }}"
+        dest: "{{ temp_backup_dir.path }}/moodledata-{{ inventory_hostname }}.{{ ansible_date_time.epoch }}"
+      register: sync_result
 
-- name: Archive data folder
-  archive:
-    path: "{{ local_dump_folder }}/moodledata-{{ inventory_hostname }}.{{ ansible_date_time.epoch }}/"
-    dest: "{{ local_dump_folder }}/moodledata-{{ inventory_hostname }}.{{ ansible_date_time.epoch }}.tar.bz2"
-    format: bz2
-  delegate_to: localhost
+    - name: Verify sync was successful
+      fail:
+        msg: "Data synchronization failed!"
+      when: sync_result is failed
+
+    - name: Archive Moodle data folder
+      archive:
+        path: "{{ temp_backup_dir.path }}/moodledata-{{ inventory_hostname }}.{{ ansible_date_time.epoch }}"
+        dest: "{{ temp_backup_dir.path }}/moodledata-{{ inventory_hostname }}.{{ ansible_date_time.epoch }}.tar.bz2"
+        format: bz2
+        mode: '0644'
+      delegate_to: localhost
+      register: archive_result
+
+    - name: Verify archive was created
+      stat:
+        path: "{{ temp_backup_dir.path }}/moodledata-{{ inventory_hostname }}.{{ ansible_date_time.epoch }}.tar.bz2"
+      register: archive_stat
+
+    - name: Fail if archive was not created
+      fail:
+        msg: "Archive creation failed!"
+      when: not archive_stat.stat.exists
+  rescue:
+    - name: Debug - Backup process failed, cleaning up
+      ansible.builtin.debug:
+        msg: "An error occurred during backup. Cleaning up temporary directory."
+  always:
+    - name: Cleanup temporary directory
+      file:
+        state: absent
+        path: "{{ temp_backup_dir.path }}"
+      delegate_to: localhost
