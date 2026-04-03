@@ -3,6 +3,7 @@
 # (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 import os
 import json
+import shlex
 
 from ansible.errors import AnsibleError
 from ansible.plugins.action import ActionBase
@@ -36,8 +37,9 @@ class ActionModule(ActionBase):
 
             # Run the PHP script directly
             # Run the PHP script directly with install_dir argument
+            quoted_install_dir = shlex.quote(install_dir)
             result = self._low_level_execute_command(
-                f"php {remote_path} {install_dir}",
+                f"php {shlex.quote(remote_path)} {quoted_install_dir}",
                 sudoable=True)
 
             # Cleanup the tool after execution

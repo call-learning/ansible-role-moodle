@@ -14,8 +14,9 @@ try {
     }
 
     // Check for config.php
-    if (file_exists($cfgpath . '/config.php')) {
-        require($cfgpath . '/config.php');
+    $configpath = rtrim($cfgpath, '/') . '/config.php';
+    if (file_exists($configpath)) {
+        require($configpath);
     } else {
         $returnvalue = [
             'failed' => true,
