@@ -5,10 +5,10 @@ galaxy_info:
   role_name: moodle
   namespace: call_learning
   author: laurentdavid
-  description: Moodle CentOS/Debian/Ubuntu.
+  description: Install and manage Moodle on supported Debian, Ubuntu, and Rocky Linux hosts.
   company: "CALL Learning"
-  license: "license (BSD, MIT)"
-  min_ansible_version: 11.0
+  license: "MIT"
+  min_ansible_version: "2.18"
   platforms:
     - name: Debian
       versions:
@@ -16,6 +16,7 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - jammy
+        - noble
     - name: RockyLinux
       versions:
         - 9
