@@ -1,7 +1,9 @@
 ---
 
 - name: Reset password
-  command: chdir="{{ moodle_src_path }}" {{ item }}
+  command: "{{ item }}"
+  args:
+    chdir: "{{ moodle_src_path }}"
   loop:
     - php admin/cli/purge_caches.php
     - php admin/cli/reset_password.php

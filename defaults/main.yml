@@ -60,6 +60,9 @@ moodle_extra_db_options: []
 
 # If set to no, do not launch setup database/config file
 moodle_run_config: true
+moodle_manage_config: true
+moodle_overwrite_config: false
+moodle_reset_admin_password: false
 
 shared_drive_subfolder_create: true
 

@@ -8,4 +8,4 @@
   become: true
   become_user: "{{ moodle_webserver_user }}"
   register: updaterresult
-  changed_when: updaterresult.rc != 0
+  changed_when: updaterresult.rc == 0

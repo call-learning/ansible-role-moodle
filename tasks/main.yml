@@ -1,8 +1,9 @@
 ---
 - name: Verify Ansible meets version requirements
   assert:
-    that: "ansible_version.full is version_compare('2.18', '>=')"
-    msg: "You must update Ansible to at least 2.8 to use this role."
+    that:
+      - ansible_version.full is version('2.18', '>=')
+    msg: "This role requires ansible-core 2.18 or newer."
 
 - name: Setup additional vars
   import_tasks: configure-vars.yml
@@ -15,8 +16,8 @@
 
 - name: Fetch source
   import_tasks: commands/moodle-fetchsources.yml
-  when: moodle_fetch_source|bool
+  when: moodle_fetch_source | bool
 
 - name: Run setup and configuration.
   import_tasks: setup-moodle.yml
-  when: moodle_run_config|bool and moodle_fetch_source|bool
+  when: moodle_run_config | bool

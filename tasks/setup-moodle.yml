@@ -1,12 +1,42 @@
 ---
+- name: Check whether Moodle config already exists
+  stat:
+    path: "{{ moodle_src_path }}/config.php"
+  register: moodle_config
 
-- name: Create config if it does not exist
+- name: Create Moodle config for a new installation
   template:
     src: config.php.j2
     dest: "{{ moodle_src_path }}/config.php"
-    mode: 0644
+    mode: "0640"
     owner: "{{ moodle_webserver_user }}"
     group: "{{ moodle_webserver_group }}"
+  when:
+    - moodle_manage_config | bool
+    - not moodle_config.stat.exists
+  no_log: true
+
+- name: Update existing Moodle config when explicitly requested
+  template:
+    src: config.php.j2
+    dest: "{{ moodle_src_path }}/config.php"
+    mode: "0640"
+    owner: "{{ moodle_webserver_user }}"
+    group: "{{ moodle_webserver_group }}"
+  when:
+    - moodle_manage_config | bool
+    - moodle_overwrite_config | bool
+    - moodle_config.stat.exists
+  no_log: true
+
+- name: Fail when config management is disabled and config is missing
+  fail:
+    msg: >-
+      {{ moodle_src_path }}/config.php is missing. Either enable moodle_manage_config
+      or provide an existing Moodle configuration before running setup.
+  when:
+    - not (moodle_manage_config | bool)
+    - not moodle_config.stat.exists
 
 - name: Check Moodle status
   block:
@@ -47,7 +77,10 @@
 
 - name: Change admin password
   import_tasks: commands/moodle-resetpw.yml
-  when: moodle_state.moodle_is_installed | default(false) | bool and not (moodle_check_failed | default(false) | bool)
+  when:
+    - moodle_state.moodle_is_installed | default(false) | bool
+    - moodle_reset_admin_password | bool
+    - not (moodle_check_failed | default(false) | bool)
 
 - name: Launch update (if needed)
   import_tasks: commands/moodle-update.yml
@@ -60,6 +93,7 @@
   apt:
     name: cron
     state: present
+  become: true
   when:
     - ansible_distribution == "Ubuntu"
     - ansible_distribution_version is version('24.04', '>=')
@@ -70,12 +104,16 @@
     minute: "{{ moodle_cron_periodicity }}"
     job: "php {{ moodle_src_path }}/admin/cli/cron.php 2>&1"
     user: "{{ moodle_webserver_user }}"
-  when: moodle_cron_periodicity is defined and moodle_cron_periodicity != 0
+  when:
+    - moodle_cron_periodicity is defined
+    - moodle_cron_periodicity | int > 0
 
 - name: Setup adhoc task
   cron:
     name: "Moodle Adhoc Task"
     minute: "{{ moodle_cron_periodicity }}"
-    job: "php {{ moodle_src_path }}/admin/cli/adhoc_task.php --execute --keep-alive {{ 59 * moodle_cron_periodicity}} 2>&1"
+    job: "php {{ moodle_src_path }}/admin/cli/adhoc_task.php --execute --keep-alive {{ 59 * (moodle_cron_periodicity | int) }} 2>&1"
     user: "{{ moodle_webserver_user }}"
-  when: moodle_cron_periodicity is defined and moodle_cron_periodicity != 0
+  when:
+    - moodle_cron_periodicity is defined
+    - moodle_cron_periodicity | int > 0
