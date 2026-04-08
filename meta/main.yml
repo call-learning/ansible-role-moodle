@@ -12,7 +12,7 @@ galaxy_info:
   platforms:
     - name: Debian
       versions:
-        - bookworm
+        - trixie
     - name: Ubuntu
       versions:
         - jammy
