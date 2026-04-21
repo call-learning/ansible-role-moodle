@@ -8,11 +8,11 @@ driver:
 platforms:
   - name: instance
     image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2404}-ansible:latest"
+    user: root
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
     cgroupns_mode: host
-    command: ${MOLECULE_DOCKER_COMMAND:-""}
     privileged: true
     pre_build_image: true
     etc_hosts: "{'moodle.test':  '127.0.0.1'}"

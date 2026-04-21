@@ -8,6 +8,7 @@ driver:
 platforms:
   - name: instanceupdate
     image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2204}-ansible:latest"
+    user: root
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
     cgroupns_mode: host
