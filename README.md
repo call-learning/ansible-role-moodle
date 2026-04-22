@@ -1,7 +1,6 @@
 # Ansible Role: Moodle
 
-[![CI Test](https://github.com/call-learning/ansible-role-moodle/actions/workflows/molecule.yml/badge.svg)](https://github.com/call-learning/ansible-role-moodle/actions/workflows/molecule.yml)
-[![Lint](https://github.com/call-learning/ansible-role-moodle/actions/workflows/lint.yml/badge.svg)](https://github.com/call-learning/ansible-role-moodle/actions/workflows/lint.yml)
+[![CI](https://github.com/call-learning/ansible-role-moodle/actions/workflows/ci.yml/badge.svg)](https://github.com/call-learning/ansible-role-moodle/actions/workflows/ci.yml)
 
 Installs and manages Moodle (4.5+) on Debian, Ubuntu, and Rocky Linux hosts.
 Tested with Ansible 11 / ansible-core 2.18.
@@ -16,7 +15,7 @@ This role manages Moodle itself; the surrounding web and database stack should b
 Available variables are listed below, along with default values (see `defaults/main.yml`):
 
 ```yaml
-moodle_version: "MOODLE_403_STABLE"
+moodle_version: "MOODLE_405_STABLE"
 moodle_src_path: "/srv/moodle/src"
 moodle_domain_name: "moodle.test"
 moodle_is_https: false
@@ -140,8 +139,8 @@ You must have the following installed:
 - `molecule`
 
 The test suite is built around [Molecule](https://ansible.readthedocs.io/projects/molecule/).
-GitHub Actions runs linting and Molecule scenarios on each change.
-The main workflow runs the full Molecule scenario set on the supported LTS baseline, and the monthly/manual `module-moodle-edge.yml` workflow checks the edge Moodle branch controlled by the `MOODLE_EDGE_VERSION` repository variable (default `502`).
+GitHub Actions runs linting and Molecule scenarios through the `ci.yml` workflow on pull requests, scheduled runs, and pushes to `master`.
+That workflow runs the full Molecule scenario set on the supported LTS baseline, and the monthly/manual `module-moodle-edge.yml` workflow checks the edge Moodle branch controlled by the `MOODLE_EDGE_VERSION` repository variable (default `502`).
 
 Run the default scenario with:
 
