@@ -1,22 +1,19 @@
 ---
-name: CI Test
+name: Moodle Edge
 'on':
   workflow_dispatch:
   schedule:
-    - cron: "0 4 * * 4"
+    - cron: "0 4 1 * *"
 
 jobs:
   molecule:
-    name: Molecule
+    name: Moodle Edge
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         distro:
-          - ubuntu2204
           - ubuntu2404
-          - debian13
-          - rockylinux9
     steps:
       - name: Check out the codebase.
         uses: actions/checkout@v4
@@ -29,18 +26,11 @@ jobs:
       - name: Install test dependencies.
         run: pip3 install ansible molecule molecule-plugins[docker] docker
 
-      # See: https://github.com/geerlingguy/ansible-role-mysql/issues/422
-      - name: Disable AppArmor on Debian.
-        run: |
-            set -x
-            sudo apt-get install apparmor-profiles
-            sudo ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/
-            sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
-        if: ${{ startsWith(matrix.distro, 'debian') }}
-
-      - name: Run all Molecule tests.
-        run: molecule test --all
+      - name: Run Molecule tests.
+        run: molecule test -s default
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
+          MOODLE_VERSION: "MOODLE_${{ vars.MOODLE_EDGE_VERSION || '502' }}_STABLE"
+          MOODLE_RELEASE_PREFIX: '5.2.'

@@ -29,6 +29,6 @@ apache_vhosts:
 remi_repo_gpg_key_url: "https://rpms.remirepo.net/RPM-GPG-KEY-remi2021"
 
 # Moodle Version
-moodle_version: "v4.3.8"
+moodle_version: "{{ lookup('ansible.builtin.env', 'MOODLE_VERSION') | default('MOODLE_405_STABLE', true) }}"
 moodle_domain_name: "moodle.test"
-moodle_target_release: "4.3.8 (Build: 20241007)"
+moodle_release_prefix: "{{ lookup('ansible.builtin.env', 'MOODLE_RELEASE_PREFIX') | default('4.5.', true) }}"
