@@ -1,9 +1,7 @@
 ---
-
 - name: Converge
   hosts: all
   become: true
-
   vars_files:
     - ../default/vars/vars.yml
     - vars/vars-db.yml
@@ -14,18 +12,30 @@
         tasks_from: phpsql-setup
       tags: install
   roles:
-    - name: geerlingguy.repo-remi
-      when: ansible_os_family == "RedHat"
+    - role: geerlingguy.repo-remi
+      when: ansible_os_family == 'RedHat'
+      tags: molecule-idempotence-notest
+    - name: geerlingguy.git
+      tags: molecule-idempotence-notest
     # Apache
     - name: geerlingguy.apache
-    # PHP
-    - name: geerlingguy.php-versions
+      tags: molecule-idempotence-notest
+    # Mysql
+    - name: geerlingguy.pgsql
+      tags: molecule-idempotence-notest
     - name: geerlingguy.php
     # Then PHP Database libraries
     - name: geerlingguy.php-pgsql
+      tags: molecule-idempotence-notest
     # PHP FPM
     - name: geerlingguy.apache-php-fpm
-    # Other dependencies such as composer
-    - name: geerlingguy.composer
+      tags: molecule-idempotence-notest
     # Finally the role under test
     - name: call_learning.moodle
+  post_tasks:
+    - name: Restart PHP-FPM
+      service:
+        name: "{{ php_fpm_service_name }}"
+        state: restarted
+        enabled: true
+      changed_when: false

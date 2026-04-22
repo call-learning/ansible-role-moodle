@@ -5,8 +5,8 @@
 moodle_webserver_user: "{{ (ansible_os_family == \"RedHat\") | ternary('apache','www-data') }}"
 moodle_webserver_group: "{{ (ansible_os_family == \"RedHat\") | ternary('apache','www-data') }}"
 
-# The core version you want to use (e.g. 3.2.1, 2.8.4).
-moodle_version: "MOODLE_41_STABLE"  # Tag or branch name
+# The core version you want to use (e.g. 4.5.11, 4.4.7).
+moodle_version: "MOODLE_405_STABLE"  # Tag or branch name
 moodle_git_url: "https://github.com/moodle/moodle"
 moodle_git_key_file: ""
 
@@ -60,26 +60,32 @@ moodle_extra_db_options: []
 
 # If set to no, do not launch setup database/config file
 moodle_run_config: true
+moodle_manage_config: true
+moodle_overwrite_config: false
+moodle_reset_admin_password: false
+moodle_php_bin: "{{ php_cli_bin | default('php') }}"
 
 shared_drive_subfolder_create: true
 
 patch_to_apply: []
 
-moosh_repository: "https://github.com/call-learning/moosh.git"
-moosh_branch: "laurentd/additional-commands"
-moosh_install_directory: "/srv/moosh"
-
 # Moodle cron periodicity in minutes
-moodle_cron_periodicity: "5"
+moodle_cron_periodicity: "1"
 
 # Should we force update the source code ?
 moodle_force_source_update: false
-
-# Should we also setup Moosh command ?
-moodle_setup_moosh: false
 
 # Should we fetch the source ?
 moodle_fetch_source: true
 
 # PHP FPM: should we install all PHP FPM Database modules (mysql, postgres...)
 install_all_db_php_modules: false
+
+# Opt-in: after PHP installation, point the host's default `php` command
+# to the version selected through php_version.
+php_set_default_cli: false
+
+# Package naming strategy used by tasks/phpsql-setup.yml on Debian/Ubuntu:
+# - versioned: install php{{ php_version }}-* packages, typically from an external PHP repo.
+# - native: install distro default php-* packages.
+php_package_strategy: "versioned"

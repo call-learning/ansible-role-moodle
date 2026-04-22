@@ -33,6 +33,7 @@
     - "{{ moodle_sitedata.shared_data_folder }}"
     - "{{ moodle_sitedata.local_data_folder }}"
     - "{{ moodle_dataroot }}"
+  become: true
 
 - name: Create all shared data Directories
   file:
@@ -45,4 +46,5 @@
     - "{{ moodle_localcachedir }}"
     - "{{ moodle_tempdir }}"
     - "{{ moodle_sharedcachedir }}"
-  when: shared_drive_subfolder_create|bool
+  when: shared_drive_subfolder_create | bool
+  become: true

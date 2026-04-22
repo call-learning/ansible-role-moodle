@@ -1,15 +1,14 @@
 ---
-# Moodle database details
+# Database configuration
 moodle_database:
-  dbtype: "mysqli"
+  dbtype: >-
+    {{ (ansible_distribution == "Rocky" or ansible_distribution == "Debian")
+    | ternary('mariadb', 'mysqli') }}
   dbhost: "localhost"
   dbname: "moodle"
   dbuser: "username"
   dbpass: "password"
   dbprefix: "mdl_"
-
-# Database details
-mysql_enablerepo: "remi"
 
 mysql_databases:
   - name: "{{ moodle_database.dbname }}"

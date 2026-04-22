@@ -1,0 +1,39 @@
+---
+
+- name: Compute PHP version and runtime facts
+  import_tasks: php-runtime-facts.yml
+
+- name: Manage the default PHP CLI on Debian/Ubuntu
+  when:
+    - php_set_default_cli | bool
+    - ansible_distribution in ['Debian', 'Ubuntu']
+  block:
+    - name: Check requested PHP CLI binary exists
+      stat:
+        path: "{{ php_cli_versioned_bin }}"
+      register: php_cli_versioned_bin_stat
+
+    - name: Fail when requested PHP CLI binary is missing
+      fail:
+        msg: >-
+          Cannot switch the default php CLI to {{ php_cli_versioned_bin }} because
+          that binary is missing. Install the requested PHP CLI package first.
+      when: not php_cli_versioned_bin_stat.stat.exists
+
+    - name: Read current default PHP CLI target
+      command:
+        argv:
+          - readlink
+          - -f
+          - /usr/bin/php
+      register: php_default_cli_target
+      changed_when: false
+
+    - name: Set the default PHP CLI alternative
+      command:
+        argv:
+          - update-alternatives
+          - --set
+          - php
+          - "{{ php_cli_versioned_bin }}"
+      when: php_default_cli_target.stdout != php_cli_versioned_bin

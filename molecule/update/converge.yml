@@ -30,17 +30,18 @@
   roles:
     - name: geerlingguy.repo-remi
       when: ansible_os_family == "RedHat"
+      tags: molecule-idempotence-notest
     # Apache
     - name: geerlingguy.apache
-    # PHP
-    - name: geerlingguy.php-versions
+      tags: molecule-idempotence-notest
     - name: geerlingguy.php
+      tags: molecule-idempotence-notest
     # Then PHP Database libraries
     - name: geerlingguy.php-mysql
+      tags: molecule-idempotence-notest
     # PHP FPM
     - name: geerlingguy.apache-php-fpm
-    # Other dependencies such as composer
-    - name: geerlingguy.composer
+      tags: molecule-idempotence-notest
     # Finally the role under test
     - name: call_learning.moodle
   tasks:

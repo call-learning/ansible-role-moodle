@@ -7,7 +7,7 @@
 
 - name: Run installer
   command: >
-    php admin/cli/install_database.php
+    {{ moodle_php_bin }} admin/cli/install_database.php
     --adminuser="{{ moodle_site_admin.username }}"
     --adminpass="{{ moodle_site_admin.password }}"
     --adminemail="{{ moodle_site_admin.email }}"
@@ -19,5 +19,6 @@
   become: true
   become_user: "{{ moodle_webserver_user }}"
   register: installerresult
-  changed_when: installerresult.rc != 0
-  when: moodle_config_source.stat.exists|bool
+  changed_when: installerresult.rc == 0
+  when: moodle_config_source.stat.exists | bool
+  no_log: true
