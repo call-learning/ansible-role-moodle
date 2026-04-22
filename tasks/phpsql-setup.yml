@@ -19,6 +19,7 @@
   apt:
     update_cache: true
   when: ansible_os_family == 'Debian'
+  changed_when: false
 
 - name: Add specific packages for Debian
   apt:

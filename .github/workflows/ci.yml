@@ -44,6 +44,12 @@ jobs:
           - ubuntu2204
           - debian13
           - debian12
+        include:
+          - distro: debian13
+            moodle_version: MOODLE_500_STABLE
+            moodle_release_prefix: '5.0.'
+          - distro: debian12
+            php_fpm_handler_state: reloaded
 
     steps:
       - name: Check out the codebase.
@@ -74,3 +80,6 @@ jobs:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
+          MOODLE_VERSION: ${{ matrix.moodle_version || 'MOODLE_405_STABLE' }}
+          MOODLE_RELEASE_PREFIX: ${{ matrix.moodle_release_prefix || '4.5.' }}
+          PHP_FPM_HANDLER_STATE: ${{ matrix.php_fpm_handler_state || 'restarted' }}

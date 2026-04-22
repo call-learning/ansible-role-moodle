@@ -2,6 +2,7 @@
 php_enable_webserver: false
 php_package_strategy: "native"
 php_enable_php_fpm: true
+php_fpm_handler_state: "{{ lookup('ansible.builtin.env', 'PHP_FPM_HANDLER_STATE') | default('restarted', true) }}"
 php_fpm_listen: "127.0.0.1:9000"
 php_enable_apc: true
 php_max_input_vars: "5000"
