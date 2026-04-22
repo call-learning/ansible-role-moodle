@@ -1,0 +1,36 @@
+---
+name: Moodle Edge
+'on':
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 1 * *"
+
+jobs:
+  molecule:
+    name: Moodle Edge
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - ubuntu2404
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies.
+        run: pip3 install ansible molecule molecule-plugins[docker] docker
+
+      - name: Run Molecule tests.
+        run: molecule test -s default
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ${{ matrix.distro }}
+          MOODLE_VERSION: "MOODLE_${{ vars.MOODLE_EDGE_VERSION || '502' }}_STABLE"
+          MOODLE_RELEASE_PREFIX: '5.2.'
