@@ -73,7 +73,9 @@
 
 - name: Install Moodle
   include_tasks: commands/moodle-install.yml
-  when: not (moodle_state.moodle_is_installed | default(false) | bool) and not (moodle_check_failed | default(false) | bool)
+  when:
+    - not (moodle_state.moodle_is_installed | default(false) | bool)
+    - not (moodle_check_failed | default(false) | bool)
 
 - name: Change admin password
   import_tasks: commands/moodle-resetpw.yml
@@ -112,7 +114,9 @@
   cron:
     name: "Moodle Adhoc Task"
     minute: "{{ moodle_cron_periodicity }}"
-    job: "{{ moodle_php_bin }} {{ moodle_src_path }}/admin/cli/adhoc_task.php --execute --keep-alive {{ 59 * (moodle_cron_periodicity | int) }} 2>&1"
+    job: >-
+      {{ moodle_php_bin }} {{ moodle_src_path }}/admin/cli/adhoc_task.php
+      --execute --keep-alive {{ 59 * (moodle_cron_periodicity | int) }} 2>&1
     user: "{{ moodle_webserver_user }}"
   when:
     - moodle_cron_periodicity is defined

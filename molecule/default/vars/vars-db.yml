@@ -1,7 +1,9 @@
 ---
 # Database configuration
 moodle_database:
-  dbtype: "{{ (ansible_distribution == \"Rocky\" or ansible_distribution == \"Debian\") | ternary('mariadb','mysqli') }}"
+  dbtype: >-
+    {{ (ansible_distribution == "Rocky" or ansible_distribution == "Debian")
+    | ternary('mariadb', 'mysqli') }}
   dbhost: "localhost"
   dbname: "moodle"
   dbuser: "username"

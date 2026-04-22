@@ -33,9 +33,9 @@
     # Finally the role under test
     - name: call_learning.moodle
   post_tasks:
-       - name: Restart PHP-FPM
-         service:
-           name: "{{ php_fpm_service_name }}"
-           state: restarted
-           enabled: yes
-         changed_when: false
+    - name: Restart PHP-FPM
+      service:
+        name: "{{ php_fpm_service_name }}"
+        state: restarted
+        enabled: true
+      changed_when: false
