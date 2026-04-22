@@ -138,6 +138,14 @@ You must have the following installed:
 - `ansible`
 - `molecule`
 
+If you prefer `uv` instead of a system Python for local tooling, you can create a dedicated environment and install the test dependencies with it:
+
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install ansible molecule
+```
+
 The test suite is built around [Molecule](https://ansible.readthedocs.io/projects/molecule/).
 GitHub Actions runs linting and Molecule scenarios through the `ci.yml` workflow on pull requests, scheduled runs, and pushes to `master`.
 That workflow runs the full Molecule scenario set on the supported LTS baseline, and the monthly/manual `module-moodle-edge.yml` workflow checks the edge Moodle branch controlled by the `MOODLE_EDGE_VERSION` repository variable (default `502`).
