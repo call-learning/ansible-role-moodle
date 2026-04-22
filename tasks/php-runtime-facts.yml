@@ -34,6 +34,7 @@
 
 - name: Set PHP runtime facts for Debian like systems
   set_fact:
+    php_default_version_debian: "{{ php_version }}"
     php_cli_versioned_bin: "/usr/bin/php{{ php_version }}"
     php_cli_bin: "{{ (php_set_default_cli | bool) | ternary('php', '/usr/bin/php' ~ php_version) }}"
     php_fpm_service_name: "php{{ php_version }}-fpm"
