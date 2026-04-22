@@ -63,6 +63,7 @@ moodle_run_config: true
 moodle_manage_config: true
 moodle_overwrite_config: false
 moodle_reset_admin_password: false
+moodle_php_bin: "{{ php_cli_bin | default('php') }}"
 
 shared_drive_subfolder_create: true
 
@@ -79,3 +80,12 @@ moodle_fetch_source: true
 
 # PHP FPM: should we install all PHP FPM Database modules (mysql, postgres...)
 install_all_db_php_modules: false
+
+# Opt-in: after PHP installation, point the host's default `php` command
+# to the version selected through php_version.
+php_set_default_cli: false
+
+# Package naming strategy used by tasks/phpsql-setup.yml on Debian/Ubuntu:
+# - versioned: install php{{ php_version }}-* packages, typically from an external PHP repo.
+# - native: install distro default php-* packages.
+php_package_strategy: "versioned"

@@ -34,6 +34,8 @@ moodle_manage_config: true
 moodle_overwrite_config: false
 moodle_fetch_source: true
 moodle_reset_admin_password: false
+php_set_default_cli: false
+php_package_strategy: "versioned"
 ```
 
 Important behavior:
@@ -43,6 +45,33 @@ Important behavior:
 - `moodle_manage_config`: create `config.php` when missing.
 - `moodle_overwrite_config`: update an existing `config.php`. Keep this `false` unless you explicitly want the role to rewrite a live site's configuration.
 - `moodle_reset_admin_password`: reset the admin password on an existing installation.
+- `php_set_default_cli`: opt in to making the selected `php_version` the host default `php` command. Use this only after PHP packages are installed.
+- `php_package_strategy`: applies to `tasks/phpsql-setup.yml` on Debian/Ubuntu. Use `versioned` for `php{{ php_version }}-*` packages, or `native` for distro-default `php-*` packages.
+
+When you import `tasks/phpsql-setup.yml`, it also exposes helper facts that other playbooks can consume directly:
+
+- `php_cli_bin`
+- `php_cli_versioned_bin`
+- `php_fpm_service_name`
+- `php_fpm_config_dir`
+- `php_fpm_main_config_file`
+- `php_fpm_pool_dir`
+- `php_fpm_ini_file`
+
+If you want to switch the host default `php` command after installation, call the dedicated task file explicitly:
+
+```yaml
+- import_role:
+    name: call_learning.moodle
+    tasks_from: phpsql-setup
+
+- role: geerlingguy.php
+
+- import_role:
+    name: call_learning.moodle
+    tasks_from: php-default-cli
+  when: php_set_default_cli | bool
+```
 
 ## Dependencies
 

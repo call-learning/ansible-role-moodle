@@ -23,10 +23,6 @@
     # Mysql
     - name: geerlingguy.pgsql
       tags: molecule-idempotence-notest
-    # PHP
-    - name: geerlingguy.php-versions
-      when: not (ansible_distribution == 'Debian' and (ansible_distribution_major_version | int) >= 13)
-      tags: molecule-idempotence-notest
     - name: geerlingguy.php
     # Then PHP Database libraries
     - name: geerlingguy.php-pgsql
@@ -37,9 +33,9 @@
     # Finally the role under test
     - name: call_learning.moodle
   post_tasks:
-       - name: Restart php{{ php_version }}-fpm
+       - name: Restart PHP-FPM
          service:
-           name: php{{php_version }}-fpm
+           name: "{{ php_fpm_service_name }}"
            state: restarted
            enabled: yes
          changed_when: false

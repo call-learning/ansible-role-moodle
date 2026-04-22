@@ -5,8 +5,9 @@
   args:
     chdir: "{{ moodle_src_path }}"
   loop:
-    - php admin/cli/purge_caches.php
-    - php admin/cli/reset_password.php
+    - "{{ moodle_php_bin }} admin/cli/purge_caches.php"
+    - >-
+      {{ moodle_php_bin }} admin/cli/reset_password.php
       --username="{{ moodle_site_admin.username }}" --password="{{ moodle_site_admin.password }}"
   become: true
   become_user: "{{ moodle_webserver_user }}"

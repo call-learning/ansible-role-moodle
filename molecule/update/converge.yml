@@ -34,10 +34,6 @@
     # Apache
     - name: geerlingguy.apache
       tags: molecule-idempotence-notest
-    # PHP
-    - name: geerlingguy.php-versions
-      when: not (ansible_distribution == 'Debian' and (ansible_distribution_major_version | int) >= 13)
-      tags: molecule-idempotence-notest
     - name: geerlingguy.php
       tags: molecule-idempotence-notest
     # Then PHP Database libraries
