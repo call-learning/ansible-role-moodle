@@ -1,5 +1,8 @@
 ---
 
+- name: Compute PHP version and runtime facts
+  import_tasks: php-runtime-facts.yml
+
 - name: Manage the default PHP CLI on Debian/Ubuntu
   when:
     - php_set_default_cli | bool

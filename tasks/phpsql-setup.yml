@@ -7,6 +7,8 @@
 #      tasks_from: phpsql-setup.yml
 #      tags: install
 
+- name: Compute PHP version and runtime facts
+  import_tasks: php-runtime-facts.yml
 
 #
 # Global Packages
@@ -76,26 +78,6 @@
     - name: Set Php Major version variable
       set_fact:
         php_major_version: "{{ php_version.split('.')[0] }}"
-    - name: Set PHP runtime facts for Debian like systems
-      set_fact:
-        php_cli_versioned_bin: "/usr/bin/php{{ php_version }}"
-        php_cli_bin: "{{ (php_set_default_cli | bool) | ternary('php', '/usr/bin/php' ~ php_version) }}"
-        php_fpm_service_name: "php{{ php_version }}-fpm"
-        php_fpm_config_dir: "/etc/php/{{ php_version }}/fpm"
-        php_fpm_main_config_file: "/etc/php/{{ php_version }}/fpm/php-fpm.conf"
-        php_fpm_pool_dir: "/etc/php/{{ php_version }}/fpm/pool.d"
-        php_fpm_ini_file: "/etc/php/{{ php_version }}/fpm/php.ini"
-      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-    - name: Set PHP runtime facts for RedHat systems
-      set_fact:
-        php_cli_versioned_bin: "/usr/bin/php"
-        php_cli_bin: "php"
-        php_fpm_service_name: "php-fpm"
-        php_fpm_config_dir: "/etc"
-        php_fpm_main_config_file: "/etc/php-fpm.conf"
-        php_fpm_pool_dir: "/etc/php-fpm.d"
-        php_fpm_ini_file: "/etc/php.ini"
-      when: ansible_os_family == 'RedHat'
     - name: Set Php package prefix for all systems
       set_fact:
         php_prefix: "php"

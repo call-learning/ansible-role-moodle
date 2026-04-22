@@ -1,13 +1,5 @@
 ---
 php_enable_webserver: false
-php_version: >-
-  {{
-    (
-      '8.4' if ansible_distribution == 'Debian' and (ansible_distribution_major_version | int) >= 13
-      else '8.3' if ansible_distribution == 'Ubuntu' and (ansible_distribution_major_version | int) >= 24
-      else '8.1'
-    )
-  }}
 php_package_strategy: "native"
 php_enable_php_fpm: true
 php_fpm_listen: "127.0.0.1:9000"
