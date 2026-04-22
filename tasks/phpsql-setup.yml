@@ -43,8 +43,9 @@
 
 # ALL Systems
 - name: Install dependencies.
-  package: name={{ item }}
-  with_items:
+  package:
+    name: "{{ item }}"
+  loop:
     - unzip
     - sendmail
 

@@ -43,7 +43,9 @@
           - moodle_state.current_release is match('^' ~ (moodle_release_prefix | regex_escape))
 
     - name: Get the site frontpage
-      action: uri url=http://moodle.test return_content=yes
+      ansible.builtin.uri:
+        url: http://moodle.test
+        return_content: true
       register: webpage
 
     - name: Check that the page contains
