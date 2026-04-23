@@ -42,9 +42,15 @@
     # PHP FPM
     - name: geerlingguy.apache-php-fpm
       tags: molecule-idempotence-notest
+  tasks:
+    - name: Flush handlers before running the Moodle role
+      meta: flush_handlers
+
     # Finally the role under test
     - name: call_learning.moodle
-  tasks:
+      import_role:
+        name: call_learning.moodle
+
     - name: Check the state of current moodle
       check_moodle:
         install_dir: "{{ moodle_src_path }}"

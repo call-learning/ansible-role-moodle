@@ -21,3 +21,5 @@ postgresql_databases:
 # https://github.com/geerlingguy/ansible-role-postgresql/blob/master/molecule/default/converge.yml
 
 dbengine: "postgres"
+
+php_pgsql_package: "php{{ php_version }}-pgsql"

@@ -30,12 +30,11 @@
     # PHP FPM
     - name: geerlingguy.apache-php-fpm
       tags: molecule-idempotence-notest
+  tasks:
+    - name: Flush handlers before running the Moodle role
+      meta: flush_handlers
+
     # Finally the role under test
     - name: call_learning.moodle
-  post_tasks:
-    - name: Restart PHP-FPM
-      service:
-        name: "{{ php_fpm_service_name }}"
-        state: restarted
-        enabled: true
-      changed_when: false
+      import_role:
+        name: call_learning.moodle

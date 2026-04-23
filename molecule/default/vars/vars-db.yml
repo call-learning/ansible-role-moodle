@@ -22,3 +22,5 @@ mysql_users:
     priv: "{{ moodle_database.dbname }}.*:ALL"
 
 dbengine: "mysql"
+
+php_mysql_package: "php{{ php_version }}-mysql"
