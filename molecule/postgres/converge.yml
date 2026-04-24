@@ -24,6 +24,7 @@
     - name: geerlingguy.postgresql
       tags: molecule-idempotence-notest
     - name: geerlingguy.php
+      tags: molecule-idempotence-notest
     # Then PHP Database libraries
     - name: geerlingguy.php-pgsql
       tags: molecule-idempotence-notest
@@ -31,6 +32,15 @@
     - name: geerlingguy.apache-php-fpm
       tags: molecule-idempotence-notest
   tasks:
+    - name: Ensure php-fpm is started on Debian before flushing handlers
+      service:
+        name: "{{ php_fpm_daemon }}"
+        state: started
+      when:
+        - ansible_os_family == 'Debian'
+        - php_enable_php_fpm | default(false)
+      tags: molecule-idempotence-notest
+
     - name: Flush handlers before running the Moodle role
       meta: flush_handlers
 
