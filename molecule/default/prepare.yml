@@ -1,0 +1,19 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install passwordless sudo for Rocky Linux 10 Molecule runs
+      copy:
+        dest: /etc/sudoers.d/99-molecule-ansible
+        content: |
+          {{ ansible_user_id }} ALL=(ALL) NOPASSWD: ALL
+        owner: root
+        group: root
+        mode: "0440"
+        validate: /usr/sbin/visudo -cf %s
+      when:
+        - ansible_distribution == 'Rocky'
+        - ansible_distribution_major_version | int >= 10
+        - ansible_user_id != 'root'
