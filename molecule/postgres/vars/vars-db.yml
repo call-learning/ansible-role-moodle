@@ -22,4 +22,4 @@ postgresql_databases:
 
 dbengine: "postgres"
 
-php_pgsql_package: "php{{ php_version }}-pgsql"
+php_pgsql_package: "php-pgsql"

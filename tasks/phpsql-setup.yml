@@ -7,9 +7,6 @@
 #      tasks_from: phpsql-setup.yml
 #      tags: install
 
-- name: Compute PHP version and runtime facts
-  import_tasks: php-runtime-facts.yml
-
 #
 # Global Packages
 #
@@ -76,53 +73,27 @@
 # PHP Packages
 #
 
-# ALL Distribution (note the difference in name from Debian and Ubuntu, version prefixing)
-- name: Set php_packages for all distributions
-  block:
-    - name: Set Php Major version variable
-      set_fact:
-        php_major_version: "{{ php_version.split('.')[0] }}"
-    - name: Set Php package prefix for all systems
-      set_fact:
-        php_prefix: "php"
-    - name: Set Php package prefix for versioned Debian like packages
-      set_fact:
-        php_prefix: "php{{ php_version }}"
-      when:
-        - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-        - php_package_strategy == 'versioned'
-    - name: Set all php packages names
-      set_fact:
-        php_packages:
-          - "{{ php_prefix }}-cli"
-          - "{{ php_prefix }}-common"
-          - "{{ php_prefix }}-curl"
-          - "{{ php_prefix }}-gd"
-          - "{{ php_prefix }}-intl"
-          - "{{ php_prefix }}-mbstring"
-          - "{{ php_prefix }}-opcache"
-          - "{{ php_prefix }}-readline"
-          - "{{ php_prefix }}-soap"
-          - "{{ php_prefix }}-xml"
-          - "{{ php_prefix }}-xmlrpc"
-          - "{{ php_prefix }}-fpm"
-          - "{{ php_prefix }}-cli"
-          - "{{ php_prefix }}-ldap"
-          - "{{ php_prefix }}-solr"
-          - "{{ php_prefix }}-redis"
-          - "{{ php_prefix }}-apcu"
-          - "{{ php_prefix }}-zip"
-          - "{{ php_prefix }}-intl"
-# ALL Distribution (note the difference in name from Debian and Ubuntu, version prefixing)
-- name: Set php_packages depending on PHP version
+- name: Set php packages for all distributions
   set_fact:
-    php_packages: "{{ php_packages + [ (php_prefix + '-json') ] }}"
-  when: php_major_version != "8"
-
-- name: Set php_packages depending on PHP version 8
-  set_fact:
-    php_packages: "{{ php_packages + [ (php_prefix + '-exif') ] }}"
-  when: php_major_version == "8"
+    php_packages:
+      - php-cli
+      - php-common
+      - php-curl
+      - php-gd
+      - php-intl
+      - php-mbstring
+      - php-opcache
+      - php-readline
+      - php-soap
+      - php-xml
+      - php-xmlrpc
+      - php-fpm
+      - php-ldap
+      - php-solr
+      - php-redis
+      - php-apcu
+      - php-zip
+      - php-exif
 
 - name: Drop unsupported PHP extensions on RedHat 10+.
   set_fact:
@@ -138,12 +109,12 @@
 
 - name: Set php_package for postgres
   set_fact:
-    php_packages: "{{ php_packages + [ (php_prefix + '-pgsql') ] }}"
+    php_packages: "{{ php_packages + [ 'php-pgsql' ] }}"
   when: dbengine == 'postgres' or ( install_all_db_php_modules is defined and install_all_db_php_modules )
 
 - name: Set php_package for MySQL on RedHat 10+.
   set_fact:
-    php_packages: "{{ php_packages + [ (php_prefix + '-mysqlnd') ] }}"
+    php_packages: "{{ php_packages + [ 'php-mysqlnd' ] }}"
   when:
     - dbengine == 'mysql' or ( install_all_db_php_modules is defined and install_all_db_php_modules )
     - ansible_os_family == "RedHat"
@@ -151,7 +122,7 @@
 
 - name: Set php_package for MySQL.
   set_fact:
-    php_packages: "{{ php_packages + [ (php_prefix + '-mysql') ] }}"
+    php_packages: "{{ php_packages + [ 'php-mysql' ] }}"
   when:
     - dbengine == 'mysql' or ( install_all_db_php_modules is defined and install_all_db_php_modules )
     - ansible_os_family != "RedHat" or ansible_distribution_major_version | int < 10
