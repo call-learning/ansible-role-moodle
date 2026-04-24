@@ -49,6 +49,7 @@ jobs:
           - distro: debian13
             moodle_version: MOODLE_500_STABLE
             moodle_release_prefix: '5.0.'
+            php_fpm_handler_state: reloaded
           - distro: debian12
             php_fpm_handler_state: reloaded
 
