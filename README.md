@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/call-learning/ansible-role-moodle/actions/workflows/ci.yml/badge.svg)](https://github.com/call-learning/ansible-role-moodle/actions/workflows/ci.yml)
 
-Installs and manages Moodle (4.5+) on Debian, Ubuntu, and Rocky Linux hosts.
+Installs and manages Moodle (4.5+) on Debian, Ubuntu, and Rocky Linux 10 hosts.
 Tested with Ansible 13 / ansible-core 2.20.
 
 ## Requirements

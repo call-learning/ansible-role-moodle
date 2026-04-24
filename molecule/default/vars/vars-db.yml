@@ -23,4 +23,6 @@ mysql_users:
 
 dbengine: "mysql"
 
-php_mysql_package: "php{{ php_version }}-mysql"
+php_mysql_package: >-
+  {{ 'php-mysqlnd' if (ansible_os_family == 'RedHat' and ansible_distribution_major_version | int >= 10)
+  else 'php' ~ php_version ~ '-mysql' }}

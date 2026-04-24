@@ -25,10 +25,6 @@ apache_vhosts:
         SetHandler "proxy:fcgi://{{ php_fpm_listen }}"
       </FilesMatch>
 
-# Make sure that the rockylinux9 repo remi works
-# See https://github.com/geerlingguy/ansible-role-repo-remi/pull/30/commits/ff750e8fa4eb65849a0459d157810f47bb1ba330
-remi_repo_gpg_key_url: "https://rpms.remirepo.net/RPM-GPG-KEY-remi2021"
-
 # Moodle Version
 moodle_version: "{{ lookup('ansible.builtin.env', 'MOODLE_VERSION') | default('MOODLE_405_STABLE', true) }}"
 moodle_domain_name: "moodle.test"

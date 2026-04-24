@@ -69,7 +69,9 @@
       baseurl = http://yum.mariadb.org/10.6/rhel9-amd64
       gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
       gpgcheck=1
-  when: ansible_os_family == "RedHat"
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version | int < 10
 #
 # PHP Packages
 #
@@ -122,6 +124,13 @@
     php_packages: "{{ php_packages + [ (php_prefix + '-exif') ] }}"
   when: php_major_version == "8"
 
+- name: Drop unsupported PHP extensions on RedHat 10+.
+  set_fact:
+    php_packages: "{{ php_packages | difference(['php-solr', 'php-xmlrpc']) }}"
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version | int >= 10
+
 - name: Set php_packages (apcu) for PHP Rocky.
   set_fact:
     php_packages: "{{ php_packages + ['php-pecl-apcu'] }}"
@@ -132,7 +141,17 @@
     php_packages: "{{ php_packages + [ (php_prefix + '-pgsql') ] }}"
   when: dbengine == 'postgres' or ( install_all_db_php_modules is defined and install_all_db_php_modules )
 
-- name: Set php_package for MySQL
+- name: Set php_package for MySQL on RedHat 10+.
+  set_fact:
+    php_packages: "{{ php_packages + [ (php_prefix + '-mysqlnd') ] }}"
+  when:
+    - dbengine == 'mysql' or ( install_all_db_php_modules is defined and install_all_db_php_modules )
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version | int >= 10
+
+- name: Set php_package for MySQL.
   set_fact:
     php_packages: "{{ php_packages + [ (php_prefix + '-mysql') ] }}"
-  when: dbengine == 'mysql' or ( install_all_db_php_modules is defined and install_all_db_php_modules )
+  when:
+    - dbengine == 'mysql' or ( install_all_db_php_modules is defined and install_all_db_php_modules )
+    - ansible_os_family != "RedHat" or ansible_distribution_major_version | int < 10
