@@ -27,7 +27,6 @@ verifier:
 scenario:
   name: update
   test_sequence:
-    - lint
     - destroy
     - dependency
     - syntax
