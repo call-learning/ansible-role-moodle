@@ -14,8 +14,7 @@ This matrix is based on:
   - Ubuntu 24.04
   - Debian 12
   - Debian 13
-  - Rocky Linux 8
-  - Rocky Linux 9
+  - Rocky Linux 10
 - Default distro package versions only
 
 Assumption:
@@ -54,12 +53,12 @@ This table answers the practical question:
 
 > Will this Moodle version run on this OS using stock packages only?
 
-| Moodle \ OS | Ubuntu 22.04 | Ubuntu 24.04 | Debian 12 | Debian 13 | Rocky 8 | Rocky 9 |
-|---|---:|---:|---:|---:|---:|---:|
-| 4.5 | ✅ | ✅ | ✅ | ✅ | ❌ | ⚠️ |
-| 5.0 | ❌ | ⚠️ | ✅ | ✅ | ❌ | ❌ |
-| 5.1 | ❌ | ⚠️ | ✅ | ✅ | ❌ | ❌ |
-| 5.2 | ❌ | ⚠️ | ❌ | ✅ | ❌ | ❌ |
+| Moodle \ OS | Ubuntu 22.04 | Ubuntu 24.04 | Debian 12 | Debian 13 | Rocky 10 |
+|---|---:|---:|---:|---:|---:|
+| 4.5 | ✅ | ✅ | ✅ | ✅ | ⚠️ |
+| 5.0 | ❌ | ⚠️ | ✅ | ✅ | ⚠️ |
+| 5.1 | ❌ | ⚠️ | ✅ | ✅ | ⚠️ |
+| 5.2 | ❌ | ⚠️ | ❌ | ✅ | ⚠️ |
 
 ## Interpretation by OS
 
@@ -136,37 +135,24 @@ Conclusion:
 
 - Best option in this list for **future-proofing**
 
-### Rocky Linux 8
+### Rocky Linux 10
 
-Typical stock packages are too old by default.
+Default packages are closer than previous Rocky releases, but the distro still expects explicit package and repository decisions for Moodle.
 
-Implications:
+Typical considerations:
 
-- **Moodle 4.5 → 5.2**: ❌ not suitable without changing streams/repos
-
-Conclusion:
-
-- Avoid for modern Moodle unless package customization is already accepted
-
-### Rocky Linux 9
-
-Default/base availability is closer, but still not a clean fit with stock packages.
-
-Typical issues:
-
-- PHP often needs stream selection for the right version
-- MariaDB default is too old for Moodle 5.x
-- MySQL 8.0 is too old for Moodle 5.x
-- Base PostgreSQL is not sufficient for the higher Moodle 5.x requirements
+- PHP 8.3 is available in AppStream
+- PostgreSQL and MariaDB package versions still need to be checked against the chosen Moodle release
+- Remi is still required if you need a newer PHP stream than the base repository provides
 
 Implications:
 
-- **Moodle 4.5**: ⚠️ possible depending on chosen stack, but not a clean “defaults only” fit
-- **Moodle 5.0+**: ❌ not suitable without stream/repo changes
+- **Moodle 4.5**: ⚠️ likely workable, but only after confirming the exact stack
+- **Moodle 5.0+**: ⚠️ depends on the database stack and any external repos you allow
 
 Conclusion:
 
-- Treat Rocky as a platform that requires package management decisions, not a zero-tweaking default
+- Treat Rocky 10 as supported in the role, but not as a fully “defaults only” Moodle target
 
 ## Recommended default choices
 
