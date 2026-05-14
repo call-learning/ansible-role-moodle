@@ -2,8 +2,8 @@
 # Front-end Moodle User (make sure either the webserver can 'login as' this user -for example
 #  through libapache2-mpm-itk )or use the standard web server user
 
-moodle_webserver_user: "{{ (ansible_os_family == \"RedHat\") | ternary('apache','www-data') }}"
-moodle_webserver_group: "{{ (ansible_os_family == \"RedHat\") | ternary('apache','www-data') }}"
+moodle_webserver_user: "{{ ((ansible_facts.os_family | default('')) == 'RedHat') | ternary('apache','www-data') }}"
+moodle_webserver_group: "{{ ((ansible_facts.os_family | default('')) == 'RedHat') | ternary('apache','www-data') }}"
 
 # The core version you want to use (e.g. 4.5.11, 4.4.7).
 moodle_version: "MOODLE_405_STABLE"  # Tag or branch name
@@ -84,8 +84,3 @@ install_all_db_php_modules: false
 # Opt-in: after PHP installation, point the host's default `php` command
 # to the version selected through php_version.
 php_set_default_cli: false
-
-# Package naming strategy used by tasks/phpsql-setup.yml on Debian/Ubuntu:
-# - versioned: install php{{ php_version }}-* packages, typically from an external PHP repo.
-# - native: install distro default php-* packages.
-php_package_strategy: "versioned"

@@ -97,8 +97,8 @@
     state: present
   become: true
   when:
-    - ansible_distribution == "Ubuntu"
-    - ansible_distribution_version is version('24.04', '>=')
+    - ansible_facts["distribution"] == "Ubuntu"
+    - ansible_facts["distribution_version"] is version('24.04', '>=')
 
 - name: Setup cron
   cron:
