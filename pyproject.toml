@@ -1,0 +1,13 @@
+[project]
+name = "ansible-role-moodle"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ansible>=13.6.0",
+    "ansible-core>=2.20.5",
+    "docker>=7.1.0",
+    "molecule-docker>=2.1.0",
+    "molecule[docker]>=26.4.0",
+]

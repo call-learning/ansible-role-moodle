@@ -18,16 +18,14 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+      - name: Set up uv.
+        uses: astral-sh/setup-uv@v4
 
       - name: Install test dependencies.
-        run: pip3 install ansible molecule molecule-plugins[docker] docker
+        run: uv sync --frozen --python 3.12
 
       - name: Run Molecule tests.
-        run: molecule test -s default
+        run: uv run molecule test -s default
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'

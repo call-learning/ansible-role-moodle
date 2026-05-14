@@ -21,17 +21,11 @@ jobs:
         with:
           path: 'call_learning.moodle'
 
-      - name: Set up Python 3.
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      - name: Install test dependencies.
-        run: pip3 install yamllint ansible
+      - name: Set up uv.
+        uses: astral-sh/setup-uv@v4
 
       - name: Lint code.
-        run: |
-          yamllint .
+        run: uvx yamllint .
 
   molecule:
     name: Molecule
@@ -39,18 +33,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro:
-          - rockylinux10
-          - ubuntu2404
-          - ubuntu2204
-          - debian13
-          - debian12
         include:
-          - distro: debian13
+          - scenario: default
+            distro: rockylinux10
+          - scenario: default
+            distro: ubuntu2404
+          - scenario: default
+            distro: ubuntu2204
+          - scenario: default
+            distro: debian13
             moodle_version: MOODLE_500_STABLE
             moodle_release_prefix: '5.0.'
-          - distro: debian12
-            php_fpm_handler_state: reloaded
+          - scenario: default
+            distro: debian12
+          - scenario: postgres
+            distro: rockylinux10
+          - scenario: postgres
+            distro: debian13
+          - scenario: update
+            distro: debian13
+            moodle_update_from_version: v5.0.0
+            moodle_update_to_version: v5.0.1
 
     steps:
       - name: Check out the codebase.
@@ -58,13 +61,29 @@ jobs:
         with:
           path: 'call_learning.moodle'
 
-      - name: Set up Python 3.
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
+      - name: Set up uv.
+        uses: astral-sh/setup-uv@v4
 
       - name: Install test dependencies.
-        run: pip3 install ansible molecule molecule-plugins[docker] docker
+        run: uv sync --frozen --python 3.12
+
+      - name: Print environment versions for local/CI comparison.
+        run: |
+          echo "=== Python packages ==="
+          uv pip show ansible ansible-core molecule molecule-docker docker \
+            | grep -E "^(Name|Version):"
+          echo ""
+          echo "=== Ansible version ==="
+          uv run ansible --version
+          echo ""
+          echo "=== Docker image digest ==="
+          MOLECULE_IMAGE="geerlingguy/docker-${{ matrix.distro }}-ansible:latest"
+          docker pull "$MOLECULE_IMAGE" --quiet
+          docker inspect --format='{{.Id}} created={{.Created}}' "$MOLECULE_IMAGE"
+          echo ""
+          echo "=== Ansible Galaxy roles ==="
+          uv run ansible-galaxy install -r molecule-requirements.yml 2>&1 | grep -E "^- " || true
+          uv run ansible-galaxy role list | grep -v "# " | sort
 
       # See: https://github.com/geerlingguy/ansible-role-mysql/issues/422
       # Debian 12/13 can also block php-fpm with AppArmor during verify.
@@ -86,7 +105,12 @@ jobs:
         if: ${{ startsWith(matrix.distro, 'debian') }}
 
       - name: Run Molecule tests.
-        run: molecule test --all
+        run: |
+          if [ "${{ vars.MOLECULE_DEBUG }}" = "1" ]; then
+            uv run molecule --debug -vvv test -s ${{ matrix.scenario }}
+          else
+            uv run molecule test -s ${{ matrix.scenario }}
+          fi
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
@@ -94,3 +118,5 @@ jobs:
           MOODLE_VERSION: ${{ matrix.moodle_version || 'MOODLE_405_STABLE' }}
           MOODLE_RELEASE_PREFIX: ${{ matrix.moodle_release_prefix || '4.5.' }}
           PHP_FPM_HANDLER_STATE: ${{ matrix.php_fpm_handler_state || 'restarted' }}
+          MOODLE_UPDATE_FROM_VERSION: ${{ matrix.moodle_update_from_version || '' }}
+          MOODLE_UPDATE_TO_VERSION: ${{ matrix.moodle_update_to_version || '' }}
