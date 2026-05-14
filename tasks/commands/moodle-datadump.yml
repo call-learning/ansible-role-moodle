@@ -15,14 +15,14 @@
           - python3-psycopg2
           - libpq-dev
         state: present
-      when: ansible_distribution == 'Debian' and dbengine == 'postgres'
+      when: ansible_facts["distribution"] == 'Debian' and dbengine == 'postgres'
 
     - name: Install necessary packages for MySQL dump
       package:
         name:
           - python3-pymysql
         state: present
-      when: ansible_distribution == 'Debian' and dbengine == 'mysql'
+      when: ansible_facts["distribution"] == 'Debian' and dbengine == 'mysql'
 
     - name: Dump MySQL database
       community.mysql.mysql_db:

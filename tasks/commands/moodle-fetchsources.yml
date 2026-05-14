@@ -11,12 +11,7 @@
     recursive: true
     update: true
     force: "{{ moodle_force_source_update }}"
+    umask: "0022"
   become: true
   become_user: "{{ moodle_webserver_user }}"  # Check out as www-data
-
-- name: Make sure all source file belongs to the webserver user
-  file:
-    path: "{{ moodle_src_path }}"
-    owner: "{{ moodle_webserver_user }}"
-    group: "{{ moodle_webserver_group }}"
-    recurse: true
+  register: moodle_git_checkout

@@ -1,12 +1,21 @@
 ---
 
-- name: Compute PHP version and runtime facts
-  import_tasks: php-runtime-facts.yml
+- name: Require explicit php_version when managing php CLI alternatives
+  assert:
+    that:
+      - php_version is defined
+      - php_version | length > 0
+    fail_msg: "Set php_version explicitly before running tasks/php-default-cli.yml."
+  when:
+    - php_set_default_cli | bool
+    - ansible_facts["distribution"] in ['Debian', 'Ubuntu']
 
 - name: Manage the default PHP CLI on Debian/Ubuntu
   when:
     - php_set_default_cli | bool
-    - ansible_distribution in ['Debian', 'Ubuntu']
+    - ansible_facts["distribution"] in ['Debian', 'Ubuntu']
+  vars:
+    php_cli_versioned_bin: "/usr/bin/php{{ php_version }}"
   block:
     - name: Check requested PHP CLI binary exists
       stat:

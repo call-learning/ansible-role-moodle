@@ -9,6 +9,7 @@
     state: directory
     owner: "{{ moodle_webserver_user }}"
     group: "{{ moodle_webserver_group }}"
+    mode: "u=rwx,g=rx,o=rx"
   become: true
 
 - name: Create data root directory
