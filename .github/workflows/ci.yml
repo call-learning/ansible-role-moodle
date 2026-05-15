@@ -49,7 +49,7 @@ jobs:
           - scenario: postgres
             distro: rockylinux10
           - scenario: postgres
-            distro: debian13
+            distro: ubuntu2404
           - scenario: update
             distro: debian13
             moodle_update_from_version: v5.0.0
