@@ -55,6 +55,17 @@ supported by Moodle 4.5.
 
 ## Possible issues
 
+### DNF mirrorlist errors on Rocky Linux 10 in CI
+
+Rocky Linux 10 containers can occasionally fail package installs with:
+```
+Failed to download packages: No URLs in mirrorlist
+```
+
+The `prepare` phase now rewrites Rocky repo files to disable `mirrorlist` and
+enable the static `baseurl` entries in `distro-specifics/rocky-10.yml`, which
+avoids mirrorlist lookup failures in constrained CI environments.
+
 ### PAM account management errors on Rocky Linux 10 in CI
 
 Rocky Linux 10 containers in GitHub Actions may fail with:
