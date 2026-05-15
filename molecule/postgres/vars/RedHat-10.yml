@@ -1,0 +1,20 @@
+---
+__postgresql_version: "13"
+__postgresql_data_dir: "/var/lib/pgsql/data"
+__postgresql_bin_path: "/usr/bin"
+__postgresql_config_path: "/var/lib/pgsql/data"
+__postgresql_daemon: postgresql
+__postgresql_packages:
+  - postgresql
+  - postgresql-server
+  - postgresql-contrib
+__postgresql_unix_socket_directories_mode: "0755"
+postgresql_python_library: python3-psycopg2
+
+# PostgreSQL 16 on Rocky Linux 10 containers does not accept en_US.UTF-8
+# during test database creation.
+postgresql_databases:
+  - name: "{{ moodle_database.dbname }}"
+    owner: "{{ moodle_database.dbuser }}"
+    lc_collate: C.UTF-8
+    lc_ctype: C.UTF-8

@@ -1,0 +1,10 @@
+---
+- name: Prepare
+  hosts: all
+
+  tasks:
+    - name: Apply Molecule prepare distro specifics
+      include_tasks: tasks/include-distro-specifics.yml
+      vars:
+        molecule_distro_specific_dir: "{{ playbook_dir }}/distro-specifics"
+        molecule_distro_specific_phase: prepare

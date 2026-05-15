@@ -1,0 +1,114 @@
+---
+- name: Create php-fpm systemd override for Molecule on Debian 13
+  block:
+    - name: Create php-fpm systemd override directory
+      file:
+        path: /etc/systemd/system/php8.4-fpm.service.d
+        state: directory
+        mode: "0755"
+
+    - name: Use simple php-fpm service type to avoid Type=notify timeout in Docker
+      copy:
+        dest: /etc/systemd/system/php8.4-fpm.service.d/molecule.conf
+        mode: "0644"
+        content: |
+          [Service]
+          Type=simple
+  when: molecule_distro_specific_phase == 'prepare'
+
+- name: Use Moodle 5.0 defaults for Debian 13
+  set_fact:
+    moodle_version: >-
+      {{ lookup('ansible.builtin.env', 'MOODLE_VERSION') | default('MOODLE_500_STABLE', true) }}
+    moodle_release_prefix: >-
+      {{ lookup('ansible.builtin.env', 'MOODLE_RELEASE_PREFIX') | default('5.0.', true) }}
+  when: molecule_distro_specific_phase in ['converge-before-support-roles', 'verify']
+
+- name: Use Debian 13 MySQL role defaults
+  set_fact:
+    mysql_daemon: mariadb
+    mysql_packages:
+      - default-mysql-server
+    mysql_log_file_group: adm
+    mysql_slow_query_log_file: /var/log/mysql/mariadb-slow.log
+    mysql_log_error: /var/log/mysql/mysql.log
+    mysql_syslog_tag: mysqld
+    mysql_pid_file: /run/mysqld/mysqld.pid
+    mysql_config_file: /etc/mysql/my.cnf
+    mysql_config_include_dir: /etc/mysql/conf.d
+    mysql_socket: /run/mysqld/mysqld.sock
+    mysql_supports_innodb_large_prefix: false
+  when: molecule_distro_specific_phase == 'converge-before-support-roles'
+
+- name: Ensure php-fpm is started before flushing handlers
+  block:
+    - name: Start php-fpm
+      service:
+        name: "{{ php_fpm_daemon }}"
+        state: started
+        enabled: true
+  rescue:
+    - name: Show php-fpm service status
+      command:
+        argv:
+          - systemctl
+          - status
+          - "{{ php_fpm_daemon }}.service"
+          - --no-pager
+          - --full
+      register: php_fpm_systemctl_status
+      changed_when: false
+      failed_when: false
+
+    - name: Show php-fpm journal
+      command:
+        argv:
+          - journalctl
+          - -xeu
+          - "{{ php_fpm_daemon }}.service"
+          - --no-pager
+      register: php_fpm_journal
+      changed_when: false
+      failed_when: false
+
+    - name: Validate php-fpm configuration
+      command:
+        argv:
+          - "/usr/sbin/php-fpm{{ php_default_version_debian }}"
+          - -tt
+      register: php_fpm_configtest
+      changed_when: false
+      failed_when: false
+
+    - name: Fail with php-fpm diagnostics
+      fail:
+        msg: |
+          Failed to start {{ php_fpm_daemon }}.
+          systemctl status:
+          {{ php_fpm_systemctl_status.stdout | default('') }}
+          {{ php_fpm_systemctl_status.stderr | default('') }}
+
+          journalctl:
+          {{ php_fpm_journal.stdout | default('') }}
+          {{ php_fpm_journal.stderr | default('') }}
+
+          php-fpm -tt:
+          {{ php_fpm_configtest.stdout | default('') }}
+          {{ php_fpm_configtest.stderr | default('') }}
+  when:
+    - molecule_distro_specific_phase == 'converge-before-role'
+    - php_enable_php_fpm | default(false)
+
+- name: Restart Apache after Moodle document root exists
+  service:
+    name: apache2
+    state: restarted
+  when: molecule_distro_specific_phase in ['converge-after-role', 'verify']
+
+- name: Restart php-fpm after role configuration
+  service:
+    name: "{{ php_fpm_daemon | default('php' ~ php_default_version_debian ~ '-fpm') }}"
+    state: restarted
+  when:
+    - molecule_distro_specific_phase in ['converge-after-role', 'verify']
+    - php_enable_php_fpm | default(false)

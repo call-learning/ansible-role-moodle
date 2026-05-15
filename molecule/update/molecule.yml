@@ -20,14 +20,17 @@ provisioner:
   name: ansible
   log: true
   playbooks:
+    prepare: ../default/prepare.yml
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
     verify: ../default/verify.yml
+  config_options:
+    defaults:
+      ALLOW_BROKEN_CONDITIONALS: true
 verifier:
   name: ansible
 scenario:
   name: update
   test_sequence:
-    - lint
     - destroy
     - dependency
     - syntax

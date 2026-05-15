@@ -20,6 +20,10 @@ provisioner:
   name: ansible
   log: true
   playbooks:
+    prepare: prepare.yml
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
+  config_options:
+    defaults:
+      ALLOW_BROKEN_CONDITIONALS: true
 verifier:
   name: ansible

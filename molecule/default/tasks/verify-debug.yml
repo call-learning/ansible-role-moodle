@@ -1,0 +1,360 @@
+---
+- name: Apache vhost diagnostics (apachectl -S)
+  ansible.builtin.command: apachectl -S
+  become: true
+  register: apache_vhosts
+  changed_when: false
+  failed_when: false
+
+- name: HTTP diagnostics (request by domain)
+  ansible.builtin.uri:
+    url: "http{{ moodle_is_https | bool | ternary('s', '') }}://{{ moodle_domain_name }}/"
+    method: GET
+    return_content: true
+    validate_certs: false
+    follow_redirects: all
+  register: webpage_diag_domain
+  failed_when: false
+
+- name: HTTP diagnostics (request by 127.0.0.1 with Host header)
+  ansible.builtin.uri:
+    url: "http://127.0.0.1/"
+    method: GET
+    headers:
+      Host: "{{ moodle_domain_name }}"
+    return_content: true
+    follow_redirects: all
+  register: webpage_diag_loopback
+  failed_when: false
+
+- name: Show HTTP diagnostics
+  ansible.builtin.debug:
+    msg:
+      - >-
+        domain status={{ webpage_diag_domain.status | default('n/a') }}
+        url={{ webpage_diag_domain.url | default('n/a') }}
+      - >-
+        domain content_type={{ webpage_diag_domain.content_type | default('n/a') }}
+        redirected={{ webpage_diag_domain.redirected | default('n/a') }}
+      - >-
+        domain server={{ webpage_diag_domain.server | default('n/a') }}
+        date={{ webpage_diag_domain.date | default('n/a') }}
+      - >-
+        domain body_head={{
+          (webpage_diag_domain.content | default('') | regex_replace('\n', ' ') | truncate(200, True))
+        }}
+      - >-
+        loopback status={{ webpage_diag_loopback.status | default('n/a') }}
+        url={{ webpage_diag_loopback.url | default('n/a') }}
+      - >-
+        loopback content_type={{ webpage_diag_loopback.content_type | default('n/a') }}
+        redirected={{ webpage_diag_loopback.redirected | default('n/a') }}
+      - >-
+        loopback server={{ webpage_diag_loopback.server | default('n/a') }}
+        date={{ webpage_diag_loopback.date | default('n/a') }}
+      - >-
+        loopback body_head={{
+          (webpage_diag_loopback.content | default('') | regex_replace('\n', ' ') | truncate(200, True))
+        }}
+
+- name: Tail Apache error log
+  ansible.builtin.command:
+    argv: [tail, -n, "200", /var/log/apache2/error.log]
+  register: apache_error_log_tail
+  changed_when: false
+  failed_when: false
+
+- name: Tail Apache access log
+  ansible.builtin.command:
+    argv: [tail, -n, "200", /var/log/apache2/access.log]
+  register: apache_access_log_tail
+  changed_when: false
+  failed_when: false
+
+- name: PHP-FPM systemd status
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - status
+      - "{{ php_fpm_daemon }}.service"
+      - --no-pager
+      - --full
+  register: php_fpm_systemctl_status_verify
+  changed_when: false
+  failed_when: false
+  when:
+    - php_enable_php_fpm | default(false)
+    - php_fpm_daemon is defined
+
+- name: PHP-FPM journal tail
+  ansible.builtin.command:
+    argv:
+      - journalctl
+      - -u
+      - "{{ php_fpm_daemon }}.service"
+      - -n
+      - "200"
+      - --no-pager
+  register: php_fpm_journal_tail_verify
+  changed_when: false
+  failed_when: false
+  when:
+    - php_enable_php_fpm | default(false)
+    - php_fpm_daemon is defined
+
+- name: Show enabled Apache vhost config (vhosts.conf)
+  ansible.builtin.command:
+    argv: [sed, -n, "1,200p", /etc/apache2/sites-enabled/vhosts.conf]
+  register: apache_vhosts_conf
+  changed_when: false
+  failed_when: false
+
+- name: Show source tree permissions
+  ansible.builtin.command:
+    argv:
+      - namei
+      - -l
+      - "{{ moodle_src_path }}/index.php"
+  register: moodle_namei
+  changed_when: false
+  failed_when: false
+
+- name: Show index.php stat
+  ansible.builtin.command:
+    argv:
+      - stat
+      - -c
+      - "%U %G %a %n"
+      - "{{ moodle_src_path }}/index.php"
+  register: moodle_index_stat
+  changed_when: false
+  failed_when: false
+
+- name: Check index.php readability as www-data
+  ansible.builtin.command:
+    argv:
+      - test
+      - -r
+      - "{{ moodle_src_path }}/index.php"
+  become: true
+  become_user: "{{ moodle_webserver_user }}"
+  register: moodle_index_readable
+  changed_when: false
+  failed_when: false
+
+- name: Show php-fpm pool config
+  ansible.builtin.command:
+    argv:
+      - bash
+      - -lc
+      - "grep -R --line-number -E '^(user|group|listen.owner|listen.group)\\s*=|^\\[www\\]' /etc/php/*/fpm/pool.d/*.conf"
+  register: php_fpm_pool_config
+  changed_when: false
+  failed_when: false
+
+- name: Show php-fpm access restrictions
+  ansible.builtin.command:
+    argv:
+      - bash
+      - -lc
+      - "grep -R --line-number -E '^(chroot|open_basedir|security.limit_extensions|doc_root|user_dir|cgi.fix_pathinfo|php_admin_value|php_value)\\s*=' /etc/php"
+  register: php_fpm_restrictions
+  changed_when: false
+  failed_when: false
+
+- name: Show php ini files
+  ansible.builtin.command:
+    argv:
+      - php
+      - --ini
+  register: php_ini_files
+  changed_when: false
+  failed_when: false
+
+- name: Show AppArmor status
+  ansible.builtin.command:
+    argv:
+      - aa-status
+  register: apparmor_status
+  changed_when: false
+  failed_when: false
+
+- name: Show php-fpm AppArmor profile files
+  ansible.builtin.command:
+    argv:
+      - bash
+      - -lc
+      - "ls -l /etc/apparmor.d/php-fpm /etc/apparmor.d/local/php-fpm 2>/dev/null || true"
+  register: php_fpm_apparmor_profiles
+  changed_when: false
+  failed_when: false
+
+- name: Show php-fpm AppArmor local override
+  ansible.builtin.command:
+    argv:
+      - bash
+      - -lc
+      - |
+        for path in /etc/apparmor.d/local/php-fpm /etc/apparmor.d/local/usr.sbin.php-fpm /etc/apparmor.d/local/usr.sbin.php-fpm8.2 /etc/apparmor.d/local/usr.sbin.php-fpm8.4; do
+          if [ -e "$path" ]; then
+            echo "== $path =="
+            cat "$path"
+          fi
+        done
+  register: php_fpm_apparmor_local_override
+  changed_when: false
+  failed_when: false
+
+- name: Show recent AppArmor denials
+  ansible.builtin.command:
+    argv:
+      - bash
+      - -lc
+      - "journalctl -k -n 200 --no-pager | grep -i apparmor || true"
+  register: apparmor_denials
+  changed_when: false
+  failed_when: false
+
+- name: Show php-fpm processes
+  ansible.builtin.command:
+    argv:
+      - ps
+      - -eo
+      - user,group,pid,cmd
+      - --sort=user
+  register: php_fpm_processes
+  changed_when: false
+  failed_when: false
+
+- name: Show Moodle wwwroot from config.php
+  ansible.builtin.command:
+    argv:
+      - "{{ moodle_php_bin | default('php') }}"
+      - -r
+      - "define('CLI_SCRIPT', true); require '{{ moodle_src_path }}/config.php'; echo $CFG->wwwroot;"
+  become: true
+  become_user: "{{ moodle_webserver_user }}"
+  register: moodle_wwwroot
+  changed_when: false
+  failed_when: false
+
+- name: Show Moodle access settings
+  ansible.builtin.command:
+    argv:
+      - "{{ moodle_php_bin | default('php') }}"
+      - admin/cli/cfg.php
+      - --name=forcelogin
+  args:
+    chdir: "{{ moodle_src_path }}"
+  become: true
+  become_user: "{{ moodle_webserver_user }}"
+  register: moodle_forcelogin
+  changed_when: false
+  failed_when: false
+
+- name: Show Moodle guest login setting
+  ansible.builtin.command:
+    argv:
+      - "{{ moodle_php_bin | default('php') }}"
+      - admin/cli/cfg.php
+      - --name=guestloginbutton
+  args:
+    chdir: "{{ moodle_src_path }}"
+  become: true
+  become_user: "{{ moodle_webserver_user }}"
+  register: moodle_guestloginbutton
+  changed_when: false
+  failed_when: false
+
+- name: Show Moodle site public setting
+  ansible.builtin.command:
+    argv:
+      - "{{ moodle_php_bin | default('php') }}"
+      - admin/cli/cfg.php
+      - --name=site_is_public
+  args:
+    chdir: "{{ moodle_src_path }}"
+  become: true
+  become_user: "{{ moodle_webserver_user }}"
+  register: moodle_site_is_public
+  changed_when: false
+  failed_when: false
+
+- name: Show Moodle git version
+  ansible.builtin.command:
+    argv:
+      - git
+      - -C
+      - "{{ moodle_src_path }}"
+      - rev-parse
+      - --short
+      - HEAD
+  register: moodle_git_version
+  changed_when: false
+  failed_when: false
+
+- name: Curl verbose diagnostics (domain)
+  ansible.builtin.command:
+    argv:
+      - curl
+      - -sv
+      - --max-time
+      - "10"
+      - "http{{ moodle_is_https | bool | ternary('s', '') }}://{{ moodle_domain_name }}/"
+  register: curl_diag_domain
+  changed_when: false
+  failed_when: false
+
+- name: Show server logs and curl diagnostics
+  ansible.builtin.debug:
+    msg:
+      - "enabled vhosts.conf:"
+      - "{{ apache_vhosts_conf.stdout | default('') }}"
+      - "index.php namei:"
+      - "{{ moodle_namei.stdout | default('') }}"
+      - "index.php stat:"
+      - "{{ moodle_index_stat.stdout | default('') }}"
+      - "index.php readable as {{ moodle_webserver_user }}:"
+      - "{{ moodle_index_readable.rc | default('n/a') }}"
+      - "php-fpm pool config:"
+      - "{{ php_fpm_pool_config.stdout | default('') }}"
+      - "php-fpm restrictions:"
+      - "{{ php_fpm_restrictions.stdout | default('') }}"
+      - "php --ini:"
+      - "{{ php_ini_files.stdout | default('') }}"
+      - "apparmor status:"
+      - "{{ apparmor_status.stdout | default('') }}"
+      - "php-fpm AppArmor profile files:"
+      - "{{ php_fpm_apparmor_profiles.stdout | default('') }}"
+      - "php-fpm AppArmor local override:"
+      - "{{ php_fpm_apparmor_local_override.stdout | default('') }}"
+      - "apparmor denials:"
+      - "{{ apparmor_denials.stdout | default('') }}"
+      - "php-fpm processes:"
+      - "{{ php_fpm_processes.stdout | default('') }}"
+      - "moodle wwwroot:"
+      - "{{ moodle_wwwroot.stdout | default('') }}"
+      - "moodle forcelogin:"
+      - "{{ moodle_forcelogin.stdout | default('') }}"
+      - "moodle guestloginbutton:"
+      - "{{ moodle_guestloginbutton.stdout | default('') }}"
+      - "moodle site_is_public:"
+      - "{{ moodle_site_is_public.stdout | default('') }}"
+      - "moodle git version:"
+      - "{{ moodle_git_version.stdout | default('') }}"
+      - "installed moodle version:"
+      - "{{ moodle_state.current_version | default('') }}"
+      - "installed moodle release:"
+      - "{{ moodle_state.current_release | default('') }}"
+      - "expected moodle version:"
+      - "{{ moodle_version | default('') }}"
+      - "apache error.log tail:"
+      - "{{ apache_error_log_tail.stdout | default('') }}"
+      - "apache access.log tail:"
+      - "{{ apache_access_log_tail.stdout | default('') }}"
+      - "php-fpm systemctl status:"
+      - "{{ php_fpm_systemctl_status_verify.stdout | default('') }}"
+      - "php-fpm journal tail:"
+      - "{{ php_fpm_journal_tail_verify.stdout | default('') }}"
+      - "curl -sv output:"
+      - "{{ (curl_diag_domain.stderr | default('') ~ '\n' ~ (curl_diag_domain.stdout | default(''))) | trim }}"

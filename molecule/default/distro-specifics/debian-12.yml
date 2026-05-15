@@ -1,0 +1,89 @@
+---
+- name: Create php-fpm systemd override for Molecule on Debian 12
+  block:
+    - name: Create php-fpm systemd override directory
+      file:
+        path: /etc/systemd/system/php8.2-fpm.service.d
+        state: directory
+        mode: "0755"
+
+    - name: Use simple php-fpm service type to avoid Type=notify timeout in Docker
+      copy:
+        dest: /etc/systemd/system/php8.2-fpm.service.d/molecule.conf
+        mode: "0644"
+        content: |
+          [Service]
+          Type=simple
+  when: molecule_distro_specific_phase == 'prepare'
+
+- name: Ensure php-fpm is started before flushing handlers
+  block:
+    - name: Start php-fpm
+      service:
+        name: "{{ php_fpm_daemon }}"
+        state: started
+  rescue:
+    - name: Show php-fpm service status
+      command:
+        argv:
+          - systemctl
+          - status
+          - "{{ php_fpm_daemon }}.service"
+          - --no-pager
+          - --full
+      register: php_fpm_systemctl_status
+      changed_when: false
+      failed_when: false
+
+    - name: Show php-fpm journal
+      command:
+        argv:
+          - journalctl
+          - -xeu
+          - "{{ php_fpm_daemon }}.service"
+          - --no-pager
+      register: php_fpm_journal
+      changed_when: false
+      failed_when: false
+
+    - name: Validate php-fpm configuration
+      command:
+        argv:
+          - "/usr/sbin/php-fpm{{ php_default_version_debian }}"
+          - -tt
+      register: php_fpm_configtest
+      changed_when: false
+      failed_when: false
+
+    - name: Fail with php-fpm diagnostics
+      fail:
+        msg: |
+          Failed to start {{ php_fpm_daemon }}.
+          systemctl status:
+          {{ php_fpm_systemctl_status.stdout | default('') }}
+          {{ php_fpm_systemctl_status.stderr | default('') }}
+
+          journalctl:
+          {{ php_fpm_journal.stdout | default('') }}
+          {{ php_fpm_journal.stderr | default('') }}
+
+          php-fpm -tt:
+          {{ php_fpm_configtest.stdout | default('') }}
+          {{ php_fpm_configtest.stderr | default('') }}
+  when:
+    - molecule_distro_specific_phase == 'converge-before-role'
+    - php_enable_php_fpm | default(false)
+
+- name: Restart Apache after Moodle document root exists
+  service:
+    name: apache2
+    state: restarted
+  when: molecule_distro_specific_phase in ['converge-after-role', 'verify']
+
+- name: Restart php-fpm in verify to resync with Apache proxy connection
+  service:
+    name: "{{ php_fpm_daemon | default('php8.2-fpm') }}"
+    state: restarted
+  when:
+    - molecule_distro_specific_phase == 'verify'
+    - php_enable_php_fpm | default(false)
