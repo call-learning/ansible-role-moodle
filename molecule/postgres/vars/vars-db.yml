@@ -21,3 +21,12 @@ postgresql_databases:
 # https://github.com/geerlingguy/ansible-role-postgresql/blob/master/molecule/default/converge.yml
 
 dbengine: "postgres"
+
+# geerlingguy.php-pgsql defaults to php8.1-pgsql on Debian.
+# Align package name with the scenario-selected Debian PHP version.
+php_pgsql_package: >-
+  {{
+    'php' ~ php_default_version_debian ~ '-pgsql'
+    if ansible_facts["os_family"] == 'Debian'
+    else omit
+  }}
