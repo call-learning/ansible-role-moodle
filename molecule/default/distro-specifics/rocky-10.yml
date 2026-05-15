@@ -21,3 +21,27 @@
     insertbefore: BOF
     line: "account    sufficient    pam_permit.so"
   when: molecule_distro_specific_phase == 'prepare'
+
+- name: Find Rocky repo files for mirrorlist fallback
+  find:
+    paths: /etc/yum.repos.d
+    patterns: rocky*.repo
+    file_type: file
+  register: rocky_repo_files
+  when: molecule_distro_specific_phase == 'prepare'
+
+- name: Disable Rocky mirrorlist entries in CI-prone environments
+  replace:
+    path: "{{ item.path }}"
+    regexp: '^mirrorlist='
+    replace: '#mirrorlist='
+  loop: "{{ rocky_repo_files.files }}"
+  when: molecule_distro_specific_phase == 'prepare'
+
+- name: Enable Rocky static baseurl entries as mirrorlist fallback
+  replace:
+    path: "{{ item.path }}"
+    regexp: '^#baseurl=http://dl\.rockylinux\.org/(.+)$'
+    replace: 'baseurl=https://dl.rockylinux.org/\1'
+  loop: "{{ rocky_repo_files.files }}"
+  when: molecule_distro_specific_phase == 'prepare'
