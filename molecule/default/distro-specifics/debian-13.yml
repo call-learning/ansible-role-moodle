@@ -22,7 +22,9 @@
       {{ lookup('ansible.builtin.env', 'MOODLE_VERSION') | default('MOODLE_500_STABLE', true) }}
     moodle_release_prefix: >-
       {{ lookup('ansible.builtin.env', 'MOODLE_RELEASE_PREFIX') | default('5.0.', true) }}
-  when: molecule_distro_specific_phase in ['converge-before-support-roles', 'verify']
+  when:
+    - molecule_distro_specific_phase in ['converge-before-support-roles', 'verify']
+    - (moodle_update_from_version | default('')) | length == 0
 
 - name: Use Debian 13 MySQL role defaults
   set_fact:

@@ -51,6 +51,10 @@
           import_role:
             name: geerlingguy.apache
 
+        - name: geerlingguy.mysql
+          import_role:
+            name: geerlingguy.mysql
+
         - name: geerlingguy.php
           import_role:
             name: geerlingguy.php
