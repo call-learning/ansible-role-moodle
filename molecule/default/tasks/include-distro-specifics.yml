@@ -1,0 +1,20 @@
+---
+- name: Set Molecule distro-specific file path
+  set_fact:
+    molecule_distro_specific_files: >-
+      {{
+        query(
+          'ansible.builtin.first_found',
+          {
+            'files': [
+              ansible_facts["distribution"] | lower ~ '-' ~ ansible_facts["distribution_major_version"] ~ '.yml'
+            ],
+            'paths': [molecule_distro_specific_dir],
+            'skip': true
+          }
+        )
+      }}
+
+- name: Include Molecule distro-specific file
+  include_tasks: "{{ molecule_distro_specific_files[0] }}"
+  when: molecule_distro_specific_files | length > 0

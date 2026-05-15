@@ -17,6 +17,12 @@
     - vars-db.yml
 
   pre_tasks:
+    - name: Apply Molecule verify distro specifics
+      include_tasks: tasks/include-distro-specifics.yml
+      vars:
+        molecule_distro_specific_dir: "{{ playbook_dir }}/distro-specifics"
+        molecule_distro_specific_phase: verify
+
     - name: Import Moodle PHP Setup role to set the web server config
       import_role:
         name: call_learning.moodle
@@ -43,8 +49,28 @@
           - moodle_state.current_release is match('^' ~ (moodle_release_prefix | regex_escape))
 
     - name: Get the site frontpage
-      action: uri url=http://moodle.test return_content=yes
-      register: webpage
+      block:
+        - name: Fetch frontpage
+          ansible.builtin.uri:
+            url: "http{{ moodle_is_https | bool | ternary('s', '') }}://{{ moodle_domain_name }}/"
+            return_content: true
+            validate_certs: false
+            follow_redirects: all
+            status_code: 200
+          register: webpage
+          retries: 10
+          delay: 2
+          until: webpage.status | default(0) == 200
+      rescue:
+        - name: Include debug verify diagnostics
+          include_tasks: tasks/verify-debug.yml
+          when: molecule_verify_debug | bool
+
+        - name: Fail frontpage fetch with extra context
+          ansible.builtin.fail:
+            msg: >-
+              Frontpage fetch failed (status={{ webpage.status | default('n/a') }}).
+              Body head={{ (webpage.content | default('') | regex_replace('\n', ' ') | truncate(300, True)) }}
 
     - name: Check that the page contains
       assert:

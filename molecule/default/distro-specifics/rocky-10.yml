@@ -1,0 +1,23 @@
+---
+- name: Install passwordless sudo for Rocky Linux 10 Molecule runs
+  copy:
+    dest: /etc/sudoers.d/99-molecule-ansible
+    content: |
+      {{ ansible_user_id }} ALL=(ALL) NOPASSWD: ALL
+    owner: root
+    group: root
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s
+  when:
+    - molecule_distro_specific_phase == 'prepare'
+    - ansible_user_id != 'root'
+
+- name: Fix PAM sudo account management for Rocky Linux 10 in Docker/CI
+  # pam_systemd.so cannot contact systemd-logind in restricted container
+  # environments (e.g. GitHub Actions). Adding pam_permit.so as sufficient
+  # short-circuits account management before the failing module is reached.
+  lineinfile:
+    path: /etc/pam.d/sudo
+    insertbefore: BOF
+    line: "account    sufficient    pam_permit.so"
+  when: molecule_distro_specific_phase == 'prepare'

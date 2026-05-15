@@ -6,7 +6,7 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: instanceposgres
+  - name: instancepostgres
     image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2204}-ansible:latest"
     user: root
     volumes:
@@ -20,7 +20,11 @@ provisioner:
   name: ansible
   log: true
   playbooks:
+    prepare: ../default/prepare.yml
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
     verify: ../default/verify.yml
+  config_options:
+    defaults:
+      ALLOW_BROKEN_CONDITIONALS: true
 verifier:
   name: ansible
