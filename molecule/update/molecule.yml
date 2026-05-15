@@ -22,7 +22,7 @@ provisioner:
   playbooks:
     prepare: ../default/prepare.yml
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
-    verify: ../default/verify.yml
+    verify: verify.yml
   config_options:
     defaults:
       ALLOW_BROKEN_CONDITIONALS: true

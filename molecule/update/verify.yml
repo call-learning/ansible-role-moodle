@@ -1,0 +1,92 @@
+---
+
+- name: Verify
+  hosts: all
+  become: true
+
+  vars:
+    moodle_update_from_version: "{{ lookup('ansible.builtin.env', 'MOODLE_UPDATE_FROM_VERSION') | default('', true) }}"
+    moodle_update_to_version: "{{ lookup('ansible.builtin.env', 'MOODLE_UPDATE_TO_VERSION') | default('', true) }}"
+    moodle_expected_release_prefix: >-
+      {{
+        ((moodle_update_to_version | regex_replace('^v', '')).split('.')[0:2] | join('.')) ~ '.'
+        if (moodle_update_to_version | length > 0)
+        else moodle_release_prefix
+      }}
+    files_to_check:
+      - "{{ moodle_src_path }}"
+      - "{{ moodle_dataroot }}"
+      - "{{ moodle_localcachedir }}"
+      - "{{ moodle_tempdir }}"
+      - "{{ moodle_sharedcachedir }}"
+      - "{{ moodle_src_path }}/config.php"
+  vars_files:
+    - ../default/vars/vars.yml
+    - ../default/vars/vars-db.yml
+
+  pre_tasks:
+    - name: Apply Molecule verify distro specifics
+      include_tasks: ../default/tasks/include-distro-specifics.yml
+      vars:
+        molecule_distro_specific_dir: "{{ playbook_dir }}/../default/distro-specifics"
+        molecule_distro_specific_phase: verify
+
+    - name: Import Moodle PHP Setup role to set the web server config
+      import_role:
+        name: call_learning.moodle
+        tasks_from: configure-vars.yml
+  tasks:
+    - name: Check that all directories and files have been created
+      include_tasks: ../default/tools/check-exists.yml
+      loop: "{{ files_to_check }}"
+
+    - name: Get Moodle current configuration
+      check_moodle:
+        install_dir: "{{ moodle_src_path }}"
+      become: true
+      become_user: "{{ moodle_webserver_user }}"
+      register: moodle_state
+
+    - name: Check that Moodle is installed
+      assert:
+        that: moodle_state.moodle_is_installed
+
+    - name: Show expected and detected Moodle release
+      debug:
+        msg: >-
+          expected={{ moodle_expected_release_prefix }},
+          current={{ moodle_state.current_release | default('unknown') }}
+
+    - name: Check that Moodle has the right version
+      assert:
+        that:
+          - moodle_state.current_release is match('^' ~ (moodle_expected_release_prefix | regex_escape))
+
+    - name: Get the site frontpage
+      block:
+        - name: Fetch frontpage
+          ansible.builtin.uri:
+            url: "http{{ moodle_is_https | bool | ternary('s', '') }}://{{ moodle_domain_name }}/"
+            return_content: true
+            validate_certs: false
+            follow_redirects: all
+            status_code: 200
+          register: webpage
+          retries: 10
+          delay: 2
+          until: webpage.status | default(0) == 200
+      rescue:
+        - name: Include debug verify diagnostics
+          include_tasks: ../default/tasks/verify-debug.yml
+          when: molecule_verify_debug | bool
+
+        - name: Fail frontpage fetch with extra context
+          ansible.builtin.fail:
+            msg: >-
+              Frontpage fetch failed (status={{ webpage.status | default('n/a') }}).
+              Body head={{ (webpage.content | default('') | regex_replace('\n', ' ') | truncate(300, True)) }}
+
+    - name: Check that the page contains
+      assert:
+        that:
+          - "'Moodle Test Site' in webpage.content"

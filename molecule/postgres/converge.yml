@@ -70,6 +70,12 @@
     - name: Flush handlers before running the Moodle role
       meta: flush_handlers
 
+    - name: Wait for PostgreSQL to accept connections
+      wait_for:
+        host: 127.0.0.1
+        port: 5432
+        timeout: 60
+
     # Finally the role under test
     - name: call_learning.moodle
       import_role:
