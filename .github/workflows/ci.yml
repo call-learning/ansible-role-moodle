@@ -93,9 +93,8 @@ jobs:
           sudo apt-get install -y apparmor-profiles
           for profile in \
             /etc/apparmor.d/usr.sbin.mysqld \
-            /etc/apparmor.d/usr.sbin.php-fpm \
-            /etc/apparmor.d/usr.sbin.php-fpm8.2 \
-            /etc/apparmor.d/usr.sbin.php-fpm8.4
+            /etc/apparmor.d/usr.sbin.mariadb \
+            /etc/apparmor.d/php-fpm
           do
             if [ -e "$profile" ]; then
               sudo ln -sf "$profile" /etc/apparmor.d/disable/
