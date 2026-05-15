@@ -6,19 +6,87 @@
   register: moodle_config_source
 
 - name: Run installer
-  command: >
-    {{ moodle_php_bin }} admin/cli/install_database.php
-    --adminuser="{{ moodle_site_admin.username }}"
-    --adminpass="{{ moodle_site_admin.password }}"
-    --adminemail="{{ moodle_site_admin.email }}"
-    --agree-license
-    --fullname="{{ moodle_site_fullname }}"
-    --shortname="{{ moodle_site_shortname }}"
-  args:
-    chdir: "{{ moodle_src_path }}"
-  become: true
-  become_user: "{{ moodle_webserver_user }}"
-  register: installerresult
-  changed_when: installerresult.rc == 0
+  block:
+    - name: Run installer command
+      command: >
+        {{ moodle_php_bin }} admin/cli/install_database.php
+        --adminuser="{{ moodle_site_admin.username }}"
+        --adminpass="{{ moodle_site_admin.password }}"
+        --adminemail="{{ moodle_site_admin.email }}"
+        --agree-license
+        --fullname="{{ moodle_site_fullname }}"
+        --shortname="{{ moodle_site_shortname }}"
+      args:
+        chdir: "{{ moodle_src_path }}"
+      become: true
+      become_user: "{{ moodle_webserver_user }}"
+      register: installerresult
+      changed_when: installerresult.rc == 0
+      no_log: true
+  rescue:
+    - name: Show PostgreSQL service status
+      command:
+        argv:
+          - systemctl
+          - status
+          - postgresql
+          - --no-pager
+          - --full
+      register: postgres_systemctl_status
+      changed_when: false
+      failed_when: false
+
+    - name: Show PostgreSQL recent journal
+      command:
+        argv:
+          - journalctl
+          - -u
+          - postgresql
+          - --no-pager
+          - -n
+          - "200"
+      register: postgres_journal
+      changed_when: false
+      failed_when: false
+
+    - name: Check PostgreSQL readiness
+      command:
+        argv:
+          - pg_isready
+          - -h
+          - localhost
+          - -p
+          - "5432"
+      register: postgres_isready
+      changed_when: false
+      failed_when: false
+
+    - name: Show enabled PHP modules
+      command:
+        argv:
+          - "{{ moodle_php_bin }}"
+          - -m
+      register: php_modules
+      changed_when: false
+      failed_when: false
+
+    - name: Fail with installer diagnostics
+      fail:
+        msg: |
+          Moodle installer failed.
+          PostgreSQL service status:
+          {{ postgres_systemctl_status.stdout | default('') }}
+          {{ postgres_systemctl_status.stderr | default('') }}
+
+          PostgreSQL journal:
+          {{ postgres_journal.stdout | default('') }}
+          {{ postgres_journal.stderr | default('') }}
+
+          pg_isready:
+          {{ postgres_isready.stdout | default('') }}
+          {{ postgres_isready.stderr | default('') }}
+
+          PHP modules:
+          {{ php_modules.stdout | default('') }}
+          {{ php_modules.stderr | default('') }}
   when: moodle_config_source.stat.exists | bool
-  no_log: true
