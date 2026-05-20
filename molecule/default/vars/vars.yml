@@ -11,6 +11,7 @@ php_fpm_listen: "127.0.0.1:9000"
 php_enable_apc: true
 php_max_input_vars: "5000"
 molecule_verify_debug: "{{ lookup('ansible.builtin.env', 'MOLECULE_VERIFY_DEBUG') | default(false, true) | bool }}"
+moodle_installer_debug: true
 php_default_version_debian: >-
   {{
     '8.4'

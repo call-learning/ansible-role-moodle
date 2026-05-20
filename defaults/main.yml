@@ -81,6 +81,10 @@ moodle_fetch_source: true
 # PHP FPM: should we install all PHP FPM Database modules (mysql, postgres...)
 install_all_db_php_modules: false
 
+# Opt-in: include verbose installer rescue diagnostics (service status/journals).
+# Keep disabled by default to avoid leaking potentially-sensitive log output.
+moodle_installer_debug: false
+
 # Opt-in: after PHP installation, point the host's default `php` command
 # to the version selected through php_version.
 php_set_default_cli: false

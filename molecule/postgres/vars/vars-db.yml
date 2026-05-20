@@ -24,6 +24,7 @@ dbengine: "postgres"
 
 # geerlingguy.php-pgsql defaults to php8.1-pgsql on Debian.
 # Align package name with the scenario-selected Debian PHP version.
+moodle_installer_debug: true
 php_pgsql_package: >-
   {{
     'php' ~ php_default_version_debian ~ '-pgsql'
