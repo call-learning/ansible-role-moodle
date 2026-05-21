@@ -1,11 +1,51 @@
 ---
 
 - name: Run update
-  command: >
-    {{ moodle_php_bin }} admin/cli/upgrade.php --non-interactive
-  args:
-    chdir: "{{ moodle_src_path }}"
-  become: true
-  become_user: "{{ moodle_webserver_user }}"
-  register: updaterresult
-  changed_when: updaterresult.rc == 0
+  block:
+    - name: Define update log path
+      set_fact:
+        moodle_updater_log_path: "/tmp/moodle-upgrade-{{ ansible_date_time.epoch }}.log"
+
+    - name: Ensure update log path is absent
+      file:
+        path: "{{ moodle_updater_log_path }}"
+        state: absent
+      become: true
+
+    - name: Run update command
+      shell: >
+        {{ moodle_php_bin }} admin/cli/upgrade.php --non-interactive
+        > "{{ moodle_updater_log_path }}" 2>&1
+      args:
+        chdir: "{{ moodle_src_path }}"
+      become: true
+      become_user: "{{ moodle_webserver_user }}"
+      register: updaterresult
+      changed_when: updaterresult.rc == 0
+  rescue:
+    - name: Read updater output log (debug only)
+      slurp:
+        path: "{{ moodle_updater_log_path }}"
+      register: moodle_updater_log_content
+      changed_when: false
+      failed_when: false
+      when: moodle_installer_debug | bool
+
+    - name: Show updater output log (debug only)
+      debug:
+        msg: "{{ moodle_updater_log_content.content | b64decode }}"
+      changed_when: false
+      when:
+        - moodle_installer_debug | bool
+        - moodle_updater_log_content is defined
+        - moodle_updater_log_content.content is defined
+
+    - name: Fail with update diagnostics
+      fail:
+        msg: |
+          Moodle upgrade failed.
+          {% if not (moodle_installer_debug | bool) %}
+          moodle_installer_debug=false, updater output was captured but not shown.
+          {% else %}
+          See updater output above.
+          {% endif %}

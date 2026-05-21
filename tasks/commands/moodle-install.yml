@@ -7,8 +7,18 @@
 
 - name: Run installer
   block:
+    - name: Define installer log path
+      set_fact:
+        moodle_installer_log_path: "/tmp/moodle-installer-{{ ansible_date_time.epoch }}.log"
+
+    - name: Ensure installer log path is absent
+      file:
+        path: "{{ moodle_installer_log_path }}"
+        state: absent
+      become: true
+
     - name: Run installer command
-      command: >
+      shell: >
         {{ moodle_php_bin }} admin/cli/install_database.php
         --adminuser="{{ moodle_site_admin.username }}"
         --adminpass="{{ moodle_site_admin.password }}"
@@ -16,6 +26,7 @@
         --agree-license
         --fullname="{{ moodle_site_fullname }}"
         --shortname="{{ moodle_site_shortname }}"
+        > "{{ moodle_installer_log_path }}" 2>&1
       args:
         chdir: "{{ moodle_src_path }}"
       become: true
@@ -24,6 +35,42 @@
       changed_when: installerresult.rc == 0
       no_log: true
   rescue:
+    - name: Read installer output tail
+      ansible.builtin.command:
+        argv:
+          - tail
+          - -n
+          - "200"
+          - "{{ moodle_installer_log_path }}"
+      register: moodle_installer_log_tail
+      changed_when: false
+      failed_when: false
+
+    - name: Sanitize installer output tail
+      ansible.builtin.set_fact:
+        moodle_installer_log_tail_sanitized: >-
+          {{
+            (moodle_installer_log_tail.stdout | default(""))
+            | regex_replace(moodle_site_admin.password | default(""), "********")
+          }}
+      changed_when: false
+    - name: Read installer output log (debug only)
+      slurp:
+        path: "{{ moodle_installer_log_path }}"
+      register: moodle_installer_log_content
+      changed_when: false
+      failed_when: false
+      when: moodle_installer_debug | bool
+
+    - name: Show installer output log (debug only)
+      debug:
+        msg: "{{ moodle_installer_log_content.content | b64decode }}"
+      changed_when: false
+      when:
+        - moodle_installer_debug | bool
+        - moodle_installer_log_content is defined
+        - moodle_installer_log_content.content is defined
+
     - name: Show PostgreSQL service status
       command:
         argv:
@@ -143,6 +190,13 @@
       fail:
         msg: |
           Moodle installer failed.
+          Installer output tail (from {{ moodle_installer_log_path }}):
+          {{ moodle_installer_log_tail_sanitized | default("") }}
+
+          {% if moodle_installer_debug | bool %}
+          Installer output (from {{ moodle_installer_log_path }}):
+          (see debug output above)
+          {% endif %}
           Database diagnostics (dbengine={{ dbengine | default('unknown') }}):
           {% if not (moodle_installer_debug | bool) %}
           moodle_installer_debug=false, database service/journal diagnostics were skipped.

@@ -15,6 +15,12 @@ moodle_git_key_file: ""
 # http://www.pathname.com/fhs/pub/fhs-2.3.html#SRVDATAFORSERVICESPROVIDEDBYSYSTEM
 moodle_src_path: "/srv/moodle/src"
 
+# Moodle 5.1+ moved the web entry point to `public/` (directory restructure).
+# Set to:
+# - "auto" (default): enable for MOODLE_5xx_STABLE >= 501
+# - true/false: force behavior
+moodle_use_public_webroot: "auto"
+
 # Here we have the data that is either clustered or not
 # (https://docs.moodle.org/26/en/Server_cluster#Related_config.php_settings)
 # We will split the folders into local/and shared data (the folder being shared or not)

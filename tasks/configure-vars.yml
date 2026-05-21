@@ -6,3 +6,21 @@
     moodle_tempdir: "{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.temp_dir_name }}"
     moodle_sharedcachedir: "{{ moodle_sitedata.shared_data_folder }}/{{ moodle_sitedata.cache_dir_name }}"
     moodle_localcachedir: "{{ moodle_sitedata.local_data_folder }}/{{ moodle_sitedata.cache_dir_name }}"
+
+- name: Set Moodle webroot facts (Moodle 5.1+ directory restructure)
+  set_fact:
+    moodle_use_public_webroot: >-
+      {{
+        (moodle_use_public_webroot | default('auto')) == true
+        or
+        (
+          (moodle_use_public_webroot | default('auto')) == 'auto'
+          and
+          (
+            (moodle_version | default('') | string) is match('^MOODLE_[0-9]{3}_STABLE$')
+            and
+            ((moodle_version | regex_replace('^MOODLE_([0-9]{3})_STABLE$', '\\1') | int) >= 501)
+          )
+        )
+      }}
+    moodle_webroot_path: "{{ moodle_src_path ~ (moodle_use_public_webroot | bool | ternary('/public', '')) }}"
