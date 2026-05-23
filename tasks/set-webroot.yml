@@ -1,0 +1,17 @@
+---
+- name: Check for Moodle public webroot directory
+  ansible.builtin.stat:
+    path: "{{ moodle_src_path }}/public"
+  register: moodle_public_webroot_stat
+  changed_when: false
+
+- name: Set Moodle webroot path from filesystem
+  ansible.builtin.set_fact:
+    moodle_webroot_path: >-
+      {{
+        moodle_src_path
+        ~ (
+          (moodle_public_webroot_stat.stat.isdir | default(false) | bool)
+          | ternary('/public', '')
+        )
+      }}

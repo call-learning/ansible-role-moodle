@@ -43,7 +43,11 @@ jobs:
           - scenario: default
             distro: debian13
             moodle_version: MOODLE_500_STABLE
-            moodle_release_prefix: '5.0.'
+            moodle_release_prefix: '5.0'
+          - scenario: default
+            distro: debian13
+            moodle_version: MOODLE_502_STABLE
+            moodle_release_prefix: '5.2'
           - scenario: default
             distro: debian12
           - scenario: postgres

@@ -22,7 +22,6 @@ Available variables are listed below, along with default values (see `defaults/m
 ```yaml
 moodle_version: "MOODLE_405_STABLE"
 moodle_src_path: "/srv/moodle/src"
-moodle_use_public_webroot: "auto"
 moodle_domain_name: "moodle.test"
 moodle_is_https: false
 
@@ -49,7 +48,7 @@ Important behavior:
 - `moodle_manage_config`: create `config.php` when missing.
 - `moodle_overwrite_config`: update an existing `config.php`. Keep this `false` unless you explicitly want the role to rewrite a live site's configuration.
 - `moodle_reset_admin_password`: reset the admin password on an existing installation.
-- `moodle_use_public_webroot`: controls Moodle 5.1+ directory restructure handling. When enabled, the role exposes `moodle_webroot_path` as `{{ moodle_src_path }}/public` for use as Apache/Nginx document root (the Moodle codebase still lives at `moodle_src_path`).
+- `moodle_webroot_path`: derived from the source tree. When `{{ moodle_src_path }}/public` exists, the role uses that as the web root; otherwise it uses `moodle_src_path`.
 - `php_set_default_cli`: opt in to making the selected `php_version` the host default `php` command on Debian/Ubuntu. Use this only after PHP packages are installed, and set `php_version` explicitly.
 
 When you import `tasks/phpsql-setup.yml`, the role exposes helper facts that other playbooks can consume directly:

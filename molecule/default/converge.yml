@@ -9,17 +9,16 @@
       import_role:
         name: geerlingguy.git
       tags: install
-
     - name: Checkout Moodle source early (decide vhost documentroot from filesystem)
       import_role:
         name: call_learning.moodle
         tasks_from: commands/moodle-fetchsources
       tags: install
 
-    - name: Detect Moodle webroot from checkout
+    - name: Set Moodle webroot from checkout
       import_role:
         name: call_learning.moodle
-        tasks_from: detect-webroot
+        tasks_from: set-webroot
       tags: install
 
     - name: Set Apache vhost documentroot to detected Moodle webroot

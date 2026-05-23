@@ -10,4 +10,3 @@
     group: "{{ moodle_webserver_group }}"
     mode: "u=rwx,g=rx,o=rx"
   become: true
-

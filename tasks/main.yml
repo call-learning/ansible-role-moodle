@@ -18,6 +18,10 @@
   import_tasks: commands/moodle-fetchsources.yml
   when: moodle_fetch_source | bool
 
+- name: Set Moodle webroot path from checkout
+  import_tasks: set-webroot.yml
+  when: moodle_fetch_source | bool
+
 - name: Run setup and configuration.
   import_tasks: setup-moodle.yml
   when: moodle_run_config | bool
