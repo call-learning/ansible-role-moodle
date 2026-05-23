@@ -1,0 +1,16 @@
+---
+- name: Ensure Moodle webserver group exists
+  ansible.builtin.group:
+    name: "{{ moodle_webserver_group }}"
+    system: true
+    state: present
+  become: true
+- name: Ensure Moodle webserver user exists
+  ansible.builtin.user:
+    name: "{{ moodle_webserver_user }}"
+    group: "{{ moodle_webserver_group }}"
+    system: true
+    create_home: false
+    shell: /usr/sbin/nologin
+    state: present
+  become: true

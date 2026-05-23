@@ -1,0 +1,8 @@
+---
+- name: Ensure git is installed (required for source checkout)
+  ansible.builtin.package:
+    name: git
+    state: present
+  become: true
+  when: moodle_fetch_source | bool
+

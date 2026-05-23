@@ -1,0 +1,13 @@
+---
+- name: Ensure Moodle webserver user exists
+  import_tasks: "{{ role_path }}/tasks/ensure-webserver-user.yml"
+
+- name: Ensure Moodle source directory exists
+  file:
+    path: "{{ moodle_src_path }}"
+    state: directory
+    owner: "{{ moodle_webserver_user }}"
+    group: "{{ moodle_webserver_group }}"
+    mode: "u=rwx,g=rx,o=rx"
+  become: true
+

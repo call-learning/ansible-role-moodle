@@ -5,6 +5,35 @@
     - vars/vars.yml
     - vars/vars-db.yml
   pre_tasks:
+    - name: Ensure git is installed (required for Moodle source checkout)
+      import_role:
+        name: geerlingguy.git
+      tags: install
+
+    - name: Checkout Moodle source early (decide vhost documentroot from filesystem)
+      import_role:
+        name: call_learning.moodle
+        tasks_from: commands/moodle-fetchsources
+      tags: install
+
+    - name: Detect Moodle webroot from checkout
+      import_role:
+        name: call_learning.moodle
+        tasks_from: detect-webroot
+      tags: install
+
+    - name: Set Apache vhost documentroot to detected Moodle webroot
+      set_fact:
+        apache_vhosts: >-
+          {{
+            (apache_vhosts | default([]))
+            | map('combine', {'documentroot': moodle_webroot_path})
+            | list
+          }}
+      when:
+        - apache_vhosts is defined
+        - moodle_webroot_path is defined
+      tags: install
     - name: Import Moodle PHP Setup role to set the web server config
       import_role:
         name: call_learning.moodle
@@ -24,10 +53,6 @@
           import_role:
             name: geerlingguy.repo-remi
           when: ansible_facts["os_family"] == 'RedHat'
-
-        - name: geerlingguy.git
-          import_role:
-            name: geerlingguy.git
 
         - name: geerlingguy.apache
           import_role:
