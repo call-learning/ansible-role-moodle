@@ -93,14 +93,16 @@ jobs:
       # Debian 12/13 can also block php-fpm with AppArmor during verify.
       - name: Disable AppArmor on Debian.
         run: |
-          set -x
-          sudo apt-get install -y apparmor-profiles
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --fix-missing apparmor-profiles
           for profile in \
             /etc/apparmor.d/usr.sbin.mysqld \
             /etc/apparmor.d/usr.sbin.mariadb \
             /etc/apparmor.d/php-fpm
           do
             if [ -e "$profile" ]; then
+              sudo mkdir -p /etc/apparmor.d/disable
               sudo ln -sf "$profile" /etc/apparmor.d/disable/
               sudo apparmor_parser -R "$profile" || true
             fi
