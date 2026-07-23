@@ -69,8 +69,8 @@ shared_drive_subfolder_create: true
 
 patch_to_apply: []
 
-# Moodle cron periodicity in minutes
-moodle_cron_periodicity: "1"
+# Moodle cron periodicity in minutes, here every minute.
+moodle_cron_periodicity: "*"
 
 # Should we force update the source code ?
 moodle_force_source_update: false

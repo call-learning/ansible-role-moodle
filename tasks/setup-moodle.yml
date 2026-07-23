@@ -108,7 +108,7 @@
     user: "{{ moodle_webserver_user }}"
   when:
     - moodle_cron_periodicity is defined
-    - moodle_cron_periodicity | int > 0
+    - moodle_cron_periodicity == '*' or moodle_cron_periodicity | int > 0
 
 - name: Setup adhoc task
   cron:
@@ -120,4 +120,4 @@
     user: "{{ moodle_webserver_user }}"
   when:
     - moodle_cron_periodicity is defined
-    - moodle_cron_periodicity | int > 0
+    - moodle_cron_periodicity == '*' or moodle_cron_periodicity | int > 0
